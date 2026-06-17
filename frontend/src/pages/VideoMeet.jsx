@@ -15,8 +15,9 @@ import Button from '@mui/material/Button';
 import Badge from '@mui/material/Badge';
 import ChatIcon from '@mui/icons-material/Chat';
 import io from "socket.io-client";
+import server from '../environment';
 
-const server_url="http://localhost:8080";
+const server_url=server;
 
 var connections={};
 

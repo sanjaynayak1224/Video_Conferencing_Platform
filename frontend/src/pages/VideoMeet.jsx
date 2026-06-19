@@ -25,7 +25,24 @@ var iceCandidatesQueue = {};
 
 const peerConfigConnections={
     "iceServers":[
-        {"urls":"stun:stun.l.google.com:19302"}
+        {"urls":"stun:stun.l.google.com:19302"},
+        {"urls":"stun:stun1.l.google.com:19302"},
+        {"urls":"stun:stun2.l.google.com:19302"},
+        {
+            "urls":"turn:openrelay.metered.ca:80",
+            "username":"openrelayproject",
+            "credential":"openrelayproject"
+        },
+        {
+            "urls":"turn:openrelay.metered.ca:443",
+            "username":"openrelayproject",
+            "credential":"openrelayproject"
+        },
+        {
+            "urls":"turn:openrelay.metered.ca:443?transport=tcp",
+            "username":"openrelayproject",
+            "credential":"openrelayproject"
+        }
     ]
 }
 
@@ -367,8 +384,14 @@ export default function VideoMeetComponent() {
     }
 
     let connectToSocketServer=()=>{
-         console.log("CONNECT TO SOCKET CALLED");
-        socketRef.current=io.connect(server_url,{secure:false});
+         console.log("CONNECT TO SOCKET CALLED, server:", server_url);
+        socketRef.current=io.connect(server_url,{
+            secure: true,
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 10,
+            transports: ['websocket', 'polling']
+        });
 
         socketRef.current.on('signal',gotMessageFromServer);
 
@@ -387,6 +410,8 @@ export default function VideoMeetComponent() {
         });
 
         socketRef.current.on("user-joined",(id,clients)=>{
+            console.log("user-joined event:", id, "clients:", clients);
+
             clients.forEach((socketListId)=>{
                 if (socketListId === socketRef.current.id) return;
 
@@ -395,6 +420,14 @@ export default function VideoMeetComponent() {
                 }
 
                 connections[socketListId]=new RTCPeerConnection(peerConfigConnections);
+
+                connections[socketListId].onconnectionstatechange = () => {
+                    console.log(`Peer ${socketListId} connection state: ${connections[socketListId]?.connectionState}`);
+                };
+
+                connections[socketListId].oniceconnectionstatechange = () => {
+                    console.log(`Peer ${socketListId} ICE state: ${connections[socketListId]?.iceConnectionState}`);
+                };
 
                 connections[socketListId].onicecandidate=(event)=>{
 
@@ -408,27 +441,24 @@ export default function VideoMeetComponent() {
                 }
 
                 connections[socketListId].ontrack=(event)=>{
-                    const remoteStream = event.streams[0];
+                    const remoteStream = event.streams && event.streams[0];
 
                     let videoExists=videoRef.current.find(
                         video=>video.socketId===socketListId
                     );
 
                     if(videoExists){
-                        if (videoExists.stream && !videoExists.stream.getTracks().includes(event.track)) {
-                            videoExists.stream.addTrack(event.track);
-                        }
-                        setVideos((videos)=>{
-                            const updatedVideos=videos.map(video=>(
-                                video.socketId===socketListId
-                                    ? {...video,stream: videoExists.stream || remoteStream || new MediaStream([event.track])}
-                                    : video
-                            ));
-
+                        if (remoteStream) {
+                            setVideos((videos)=>{
+                                const updatedVideos=videos.map(video=>(
+                                    video.socketId===socketListId
+                                        ? {...video, stream: remoteStream}
+                                        : video
+                                ));
                                 videoRef.current=updatedVideos;
                                 return updatedVideos;
                             });
-
+                        }
                     }else{
                         const newStream = remoteStream || new MediaStream([event.track]);
                         let newVideo={
@@ -447,6 +477,7 @@ export default function VideoMeetComponent() {
                     }
                 };
 
+                // Add local tracks to the new peer connection
                 if(window.localStream){
                     window.localStream.getTracks().forEach(track => {
                         connections[socketListId].addTrack(track, window.localStream);
@@ -463,20 +494,14 @@ export default function VideoMeetComponent() {
                 }
             });
 
+            // Only the NEW joiner creates offers to all existing peers
             if(id===socketRef.current.id){
 
                 for(let id2 in connections){
 
                     if(id2===socketRef.current.id) continue;
 
-                    try{
-                        window.localStream.getTracks().forEach(track => {
-                            connections[id2].addTrack(track, window.localStream);
-                        });
-                    }catch(err){
-                        console.warn(err);
-                    }
-
+                    // DO NOT add tracks again here - they were already added above
                     connections[id2]
                         .createOffer()
                         .then((description)=>{

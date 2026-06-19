@@ -785,7 +785,7 @@ export default function VideoMeetComponent() {
                             {(video===true)?<VideocamIcon/>:<VideocamOffIcon/>}
                         </IconButton>
 
-                        <IconButton style={{color:"red"}} onClick={handleEndCall}>
+                        <IconButton className="endCallButton" onClick={handleEndCall}>
                             <CallEndIcon/>
                         </IconButton>
 

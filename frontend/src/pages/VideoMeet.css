@@ -124,54 +124,56 @@
 /* Local User Video - Repositioned to Bottom Left */
 .meetUserVideo {
     position: absolute;
-    bottom: 100px;
-    left: 20px; /* Positioned on the left side */
-    width: 250px;
-    height: 150px;
+    bottom: 110px;
+    left: 20px;
+    width: 240px;
+    aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    border: 2px solid #0E71EB;
     backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    z-index: 5;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    z-index: 10;
     background-color: #000;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .meetUserVideo:hover {
-    border-color: #0E71EB;
-    transform: scale(1.02);
+    border-color: #00d2ff;
+    transform: scale(1.05);
 }
 
 /* Remote Videos Grid */
 .conferenceView {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     gap: 20px;
     padding: 20px;
-    height: calc(100vh - 90px);
+    height: calc(100vh - 110px);
     width: 100%;
-    align-content: center;
-    justify-items: center;
     box-sizing: border-box;
+    overflow-y: auto;
+    align-content: center;
 }
 
 .remoteVideoContainer {
-    width: 100%;
-    height: 100%;
-    max-height: 48vh;
+    flex: 1 1 45%;
+    max-width: 640px;
+    aspect-ratio: 16 / 9;
     background-color: #101424;
     border-radius: 20px;
     overflow: hidden;
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .remoteVideoContainer:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+    border-color: rgba(14, 113, 235, 0.3);
+    box-shadow: 0 12px 35px rgba(14, 113, 235, 0.15);
 }
 
 .remoteVideoContainer video {
@@ -361,23 +363,26 @@ button.endCallButton:hover {
 
     /* Local Video position & size - Bottom Left */
     .meetUserVideo {
-        bottom: 90px;
-        left: 15px; /* Aligned left on mobile */
-        width: 150px;
-        height: 100px;
+        bottom: 95px;
+        left: 15px;
+        width: 140px;
+        aspect-ratio: 16 / 9;
         border-radius: 12px;
     }
 
     /* Conference layout for small screens */
     .conferenceView {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         padding: 15px;
         gap: 15px;
         height: calc(100vh - 80px);
+        overflow-y: auto;
     }
 
     .remoteVideoContainer {
-        max-height: 38vh;
+        flex: 1 1 100%;
+        max-width: 100%;
+        max-height: 40vh;
     }
 
     /* Chat takes full overlay on mobile */
@@ -403,7 +408,7 @@ button.endCallButton:hover {
 
     /* Extra small screens local video size */
     .meetUserVideo {
-        width: 120px;
-        height: 80px;
+        width: 100px;
+        aspect-ratio: 16 / 9;
     }
 }

@@ -76,6 +76,14 @@ export default function VideoMeetComponent() {
         if (getPermissionsCalled) return;
         getPermissionsCalled = true;
 
+        if (!navigator.mediaDevices) {
+            console.warn("navigator.mediaDevices is undefined. Secure context (HTTPS) required.");
+            alert("Warning: Camera & Microphone access is blocked because this page is loaded over insecure HTTP. WebRTC requires a secure context (HTTPS or localhost). Please test on localhost or configure your mobile browser to treat this IP as a secure origin.");
+            setVideoAvailable(false);
+            setAudioAvailable(false);
+            return;
+        }
+
         let hasVideo = false;
         let hasAudio = false;
         let stream = null;
@@ -290,6 +298,12 @@ export default function VideoMeetComponent() {
             window.localStream.getAudioTracks().forEach(track => {
                 track.enabled = audio;
             });
+
+            if (video && localVideoRef.current) {
+                localVideoRef.current.play().catch(err => {
+                    console.warn("Local video play attempt failed:", err);
+                });
+            }
         }
     }, [audio, video]);
 
@@ -477,6 +491,11 @@ export default function VideoMeetComponent() {
         if (connectingRef.current) return;
         if(!username.trim()){
             alert("Please enter a username.");
+            return;
+        }
+
+        if (!navigator.mediaDevices) {
+            alert("Error: WebRTC requires a secure context (HTTPS or localhost). You cannot join the meeting on insecure HTTP without HTTPS or local flags.");
             return;
         }
 
@@ -833,6 +852,9 @@ export default function VideoMeetComponent() {
                                         if (ref.srcObject !== video.stream) {
                                             ref.srcObject = video.stream;
                                         }
+                                        ref.play().catch(err => {
+                                            console.warn("Remote video play attempt failed:", err);
+                                        });
                                     }
                                 }}
                                 autoPlay>

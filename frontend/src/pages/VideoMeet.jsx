@@ -463,7 +463,7 @@ export default function VideoMeetComponent() {
 
             socketRef.current.emit(
                 "join-call",
-                window.location.href
+                window.location.pathname
             );
 
             socketIdref.current=socketRef.current.id;

@@ -21,6 +21,7 @@ const server_url=server;
 
 var connections={};
 let getPermissionsCalled = false;
+var iceCandidatesQueue = {};
 
 const peerConfigConnections={
     "iceServers":[
@@ -320,9 +321,15 @@ export default function VideoMeetComponent() {
 
             if(signal.sdp){
                 connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(()=>{
+                    // Process any queued candidates now that remote description is set
+                    if (iceCandidatesQueue[fromId]) {
+                        iceCandidatesQueue[fromId].forEach(candidate => {
+                            connections[fromId].addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.log("Error adding queued ICE candidate:", e));
+                        });
+                        delete iceCandidatesQueue[fromId];
+                    }
 
                     if(signal.sdp.type==="offer"){
-
                         connections[fromId].createAnswer().then((description)=>{
                             connections[fromId].setLocalDescription(description).then(()=>{
                                 socketRef.current.emit("signal",fromId,JSON.stringify({"sdp":connections[fromId].localDescription}))
@@ -333,8 +340,15 @@ export default function VideoMeetComponent() {
             }
 
             if(signal.ice){
-
-                connections[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e=>console.log(e));
+                const pc = connections[fromId];
+                if (pc && pc.remoteDescription && pc.remoteDescription.type) {
+                    pc.addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e=>console.log("Error adding ICE candidate directly:", e));
+                } else {
+                    if (!iceCandidatesQueue[fromId]) {
+                        iceCandidatesQueue[fromId] = [];
+                    }
+                    iceCandidatesQueue[fromId].push(signal.ice);
+                }
             }
         }
 
@@ -401,11 +415,13 @@ export default function VideoMeetComponent() {
                     );
 
                     if(videoExists){
-
+                        if (videoExists.stream && !videoExists.stream.getTracks().includes(event.track)) {
+                            videoExists.stream.addTrack(event.track);
+                        }
                         setVideos((videos)=>{
                             const updatedVideos=videos.map(video=>(
                                 video.socketId===socketListId
-                                    ? {...video,stream:remoteStream}
+                                    ? {...video,stream: videoExists.stream || remoteStream || new MediaStream([event.track])}
                                     : video
                             ));
 
@@ -414,10 +430,10 @@ export default function VideoMeetComponent() {
                             });
 
                     }else{
-
+                        const newStream = remoteStream || new MediaStream([event.track]);
                         let newVideo={
                             socketId:socketListId,
-                            stream:remoteStream,
+                            stream:newStream,
                             autoPlay:true,
                             playsInline:true
                         };

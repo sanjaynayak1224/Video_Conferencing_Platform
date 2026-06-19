@@ -183,7 +183,7 @@ export default function VideoMeetComponent() {
                     videoSender.replaceTrack(videoTrack).catch(e => console.log(e));
                 } else {
                     try {
-                        connections[id].addStream(window.localStream);
+                        connections[id].addTrack(videoTrack, window.localStream);
                     } catch(err) {
                         console.warn(err);
                     }
@@ -195,7 +195,7 @@ export default function VideoMeetComponent() {
                     audioSender.replaceTrack(audioTrack).catch(e => console.log(e));
                 } else {
                     try {
-                        connections[id].addStream(window.localStream);
+                        connections[id].addTrack(audioTrack, window.localStream);
                     } catch(err) {
                         console.warn(err);
                     }
@@ -374,6 +374,7 @@ export default function VideoMeetComponent() {
 
         socketRef.current.on("user-joined",(id,clients)=>{
             clients.forEach((socketListId)=>{
+                if (socketListId === socketRef.current.id) return;
 
                 if(connections[socketListId]){
                     return;
@@ -392,7 +393,8 @@ export default function VideoMeetComponent() {
                     }
                 }
 
-                connections[socketListId].onaddstream=(event)=>{
+                connections[socketListId].ontrack=(event)=>{
+                    const remoteStream = event.streams[0];
 
                     let videoExists=videoRef.current.find(
                         video=>video.socketId===socketListId
@@ -403,7 +405,7 @@ export default function VideoMeetComponent() {
                         setVideos((videos)=>{
                             const updatedVideos=videos.map(video=>(
                                 video.socketId===socketListId
-                                    ? {...video,stream:event.stream}
+                                    ? {...video,stream:remoteStream}
                                     : video
                             ));
 
@@ -415,7 +417,7 @@ export default function VideoMeetComponent() {
 
                         let newVideo={
                             socketId:socketListId,
-                            stream:event.stream,
+                            stream:remoteStream,
                             autoPlay:true,
                             playsInline:true
                         };
@@ -430,14 +432,18 @@ export default function VideoMeetComponent() {
                 };
 
                 if(window.localStream){
-                    connections[socketListId].addStream(window.localStream);
+                    window.localStream.getTracks().forEach(track => {
+                        connections[socketListId].addTrack(track, window.localStream);
+                    });
                 }else{
                     let blackSilenceStream=(...args)=>
                         new MediaStream([black(...args),silence()]);
 
                     window.localStream=blackSilenceStream();
 
-                    connections[socketListId].addStream(window.localStream);
+                    window.localStream.getTracks().forEach(track => {
+                        connections[socketListId].addTrack(track, window.localStream);
+                    });
                 }
             });
 
@@ -448,7 +454,9 @@ export default function VideoMeetComponent() {
                     if(id2===socketRef.current.id) continue;
 
                     try{
-                        connections[id2].addStream(window.localStream);
+                        window.localStream.getTracks().forEach(track => {
+                            connections[id2].addTrack(track, window.localStream);
+                        });
                     }catch(err){
                         console.warn(err);
                     }
@@ -667,7 +675,11 @@ export default function VideoMeetComponent() {
                     if (videoSender) {
                         videoSender.replaceTrack(videoTrack).catch(e => console.log(e));
                     } else {
-                        connections[id].addStream(window.localStream);
+                        if (window.localStream) {
+                            window.localStream.getTracks().forEach(track => {
+                                connections[id].addTrack(track, window.localStream);
+                            });
+                        }
                     }
                 }
             }catch(e){console.log(e);}

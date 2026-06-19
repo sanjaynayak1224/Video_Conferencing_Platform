@@ -10,9 +10,7 @@ const WithAuth=(WrappedComponent)=>{
             if(localStorage.getItem("token")){
                 return true;
             }
-            else{
-                false;
-            }
+            return false;
         }
 
 
@@ -21,10 +19,10 @@ const WithAuth=(WrappedComponent)=>{
                 router("/auth");
             }
         }
-        ,[])
+        ,[router])
 
         return <WrappedComponent {...props}/>
-    }
+    }   
     return AuthComponent;
 }
 

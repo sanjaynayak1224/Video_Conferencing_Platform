@@ -1,17 +1,12 @@
-import React from 'react'
-import { useContext } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import { AuthContext } from '../context/AuthContext'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton'
 import HomeIcon from '@mui/icons-material/Home'
+import "./History.css"
 
 export default function History() {
 
@@ -32,7 +27,7 @@ export default function History() {
         }
 
         fetchHistory()
-    },[])
+    },[getHistoryOfUser])
 
     let formatDate=(dateString)=>{
 
@@ -45,33 +40,37 @@ export default function History() {
     }
 
   return (
-    <div>
-          <IconButton onClick={()=>routTo("/home")}>
-                <HomeIcon/>
-          </IconButton>
-      {
-        meetings.length!==0? meetings.map((meeting,i)=>{
-            return(
-                <>
-
-                    <Card variant='outlined' key={i}>
-                        <CardContent>
-                            <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-                                Code: {meeting.meetingCode}
-                            </Typography>
-                            <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                                Date: {formatDate(meeting.date)}
-                            </ Typography>
-
-                             <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-                                User_id: {meeting.user_id}
-                            </ Typography>
-                            </CardContent>
-                    </Card>
-                </>
-            )
-        })
-      :<></>}
+    <div className="historyContainer">
+      <div className="historyHeader">
+        <IconButton onClick={() => routTo("/home")} className="homeButton">
+          <HomeIcon />
+        </IconButton>
+        <h2>Meeting History</h2>
+      </div>
+      
+      <div className="historyCardsGrid">
+        {meetings.length !== 0 ? (
+          meetings.map((meeting, i) => {
+            return (
+              <Card variant="outlined" key={i} className="historyCard">
+                <CardContent>
+                  <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }} className="cardCode">
+                    Code: {meeting.meetingCode}
+                  </Typography>
+                  <Typography sx={{ color: 'text.secondary', mb: 1.5 }} className="cardDate">
+                    Date: {formatDate(meeting.date)}
+                  </Typography>
+                  <Typography sx={{ color: 'text.secondary', mb: 1.5 }} className="cardUserId">
+                    User ID: {meeting.user_id}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          <p className="noMeetings">No meeting history found.</p>
+        )}
+      </div>
     </div>
   )
 }

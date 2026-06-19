@@ -1,0 +1,276 @@
+/* Landing Page Styles */
+.landingPageContainer {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(7, 9, 19, 0.85) 0%, rgba(13, 17, 39, 0.92) 100%), url("/background.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    overflow-x: hidden;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navigation */
+.landingPageContainer nav {
+    padding-inline: 4rem;
+    padding-block: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: rgba(13, 17, 39, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.landingPageContainer nav h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #0E71EB, #00d2ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.landingPageContainer nav h2:hover {
+    text-shadow: 0 0 20px rgba(14, 113, 235, 0.4);
+}
+
+.landingPageContainer nav .navlist {
+    display: flex;
+    gap: 2.2rem;
+    align-items: center;
+    cursor: pointer;
+}
+
+.landingPageContainer nav .navlist p {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin: 0;
+}
+
+.landingPageContainer nav .navlist p::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #0E71EB;
+    transition: width 0.25s ease;
+}
+
+.landingPageContainer nav .navlist p:hover::after {
+    width: 100%;
+}
+
+.landingPageContainer nav .navlist p:hover {
+    color: #0E71EB;
+}
+
+.landingPageContainer nav .navlist div[role="button"] {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.55rem 1.6rem;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.landingPageContainer nav .navlist div[role="button"]:hover {
+    background: linear-gradient(135deg, #0E71EB, #00d2ff);
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(14, 113, 235, 0.4);
+    transform: translateY(-2px);
+}
+
+.landingPageContainer nav .navlist div[role="button"] p {
+    margin: 0;
+    color: #ffffff;
+}
+
+.landingPageContainer nav .navlist div[role="button"] p::after {
+    display: none;
+}
+
+.landingPageContainer nav .navlist div[role="button"]:hover p {
+    color: #ffffff;
+}
+
+/* Main Hero Grid */
+.landingMainContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: 6rem;
+    flex-grow: 1;
+    gap: 5rem;
+}
+
+.landingMainContainer > div {
+    flex: 1;
+}
+
+.landingMainContainer > div:nth-child(1) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.landingMainContainer h1 {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1.5px;
+    color: #ffffff;
+}
+
+.landingMainContainer p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2.2rem;
+    line-height: 1.6;
+}
+
+/* CTA Button */
+#button {
+    background: linear-gradient(135deg, #0E71EB, #00d2ff);
+    width: fit-content;
+    padding: 1rem 2.4rem;
+    border-radius: 30px;
+    box-shadow: 0 8px 24px rgba(14, 113, 235, 0.3);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#button:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(14, 113, 235, 0.5);
+}
+
+#button > a {
+    text-decoration: none;
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Hero Image container */
+.landingMainContainer :nth-child(2) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes floatAnimation {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.landingMainContainer :nth-child(2) > img {
+    border-radius: 32px;
+    height: 52vh;
+    width: auto;
+    max-width: 100%;
+    object-fit: cover;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    animation: floatAnimation 6s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+.landingMainContainer :nth-child(2) > img:hover {
+    border-color: rgba(14, 113, 235, 0.4);
+    box-shadow: 0 25px 60px rgba(14, 113, 235, 0.2);
+}
+
+/* RESPONSIVE LAYOUTS */
+@media (max-width: 1024px) {
+    .landingPageContainer nav {
+        padding-inline: 2rem;
+    }
+
+    .landingMainContainer {
+        padding-inline: 3rem;
+        gap: 3rem;
+    }
+
+    .landingMainContainer h1 {
+        font-size: 3rem;
+    }
+
+    .landingMainContainer :nth-child(2) > img {
+        height: 42vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .landingPageContainer nav {
+        flex-direction: column;
+        gap: 1.2rem;
+        padding-block: 1.2rem;
+    }
+
+    .landingMainContainer {
+        flex-direction: column;
+        text-align: center;
+        padding-inline: 2rem;
+        padding-bottom: 3rem;
+        justify-content: center;
+        gap: 3rem;
+    }
+
+    .landingMainContainer > div:nth-child(1) {
+        align-items: center;
+    }
+
+    .landingMainContainer h1 {
+        font-size: 2.5rem;
+    }
+
+    .landingMainContainer p {
+        font-size: 1.15rem;
+    }
+
+    .landingMainContainer :nth-child(2) > img {
+        height: 35vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .landingPageContainer nav .navlist {
+        gap: 1.2rem;
+    }
+
+    .landingPageContainer nav .navlist p {
+        font-size: 0.95rem;
+    }
+
+    .landingPageContainer nav .navlist div[role="button"] {
+        padding: 0.45rem 1.2rem;
+    }
+
+    .landingMainContainer h1 {
+        font-size: 2.1rem;
+    }
+
+    .landingMainContainer :nth-child(2) > img {
+        height: 28vh;
+    }
+}

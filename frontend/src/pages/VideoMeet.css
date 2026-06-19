@@ -1,0 +1,404 @@
+/* Video Meeting Page Styles */
+.meetMainPage {
+    background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    overflow: hidden;
+}
+
+/* Lobby Styling */
+.lobbyContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 90%;
+    margin: 6rem auto;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.lobbyContainer:hover {
+    border-color: rgba(14, 113, 235, 0.3);
+    box-shadow: 0 20px 50px rgba(14, 113, 235, 0.1);
+}
+
+.lobbyContainer h2 {
+    color: #ffffff;
+    margin-bottom: 1.8rem;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(45deg, #0E71EB, #00d2ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.lobbyContainer .MuiTextField-root {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.lobbyContainer .MuiInputBase-root {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.lobbyContainer .MuiInputBase-root:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.lobbyContainer .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.lobbyContainer .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #0E71EB !important;
+}
+
+.lobbyContainer .MuiInputLabel-root {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.lobbyContainer .MuiInputLabel-root.Mui-focused {
+    color: #0E71EB !important;
+}
+
+.lobbyContainer button {
+    width: 100%;
+    padding: 0.9rem;
+    font-weight: 700;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #0E71EB, #00d2ff);
+    box-shadow: 0 4px 15px rgba(14, 113, 235, 0.3);
+    text-transform: none;
+    font-size: 1.1rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lobbyContainer button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 113, 235, 0.5);
+}
+
+.lobbyVideoContainer {
+    width: 100%;
+    margin-top: 2rem;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.lobbyVideoContainer video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Meeting Room Layout */
+.meetVideoContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: #060810;
+    overflow: hidden;
+}
+
+/* Local User Video - Repositioned to Bottom Left */
+.meetUserVideo {
+    position: absolute;
+    bottom: 100px;
+    left: 20px; /* Positioned on the left side */
+    width: 250px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+    background-color: #000;
+    transition: all 0.3s ease;
+}
+
+.meetUserVideo:hover {
+    border-color: #0E71EB;
+    transform: scale(1.02);
+}
+
+/* Remote Videos Grid */
+.conferenceView {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 90px);
+    width: 100%;
+    align-content: center;
+    justify-items: center;
+    box-sizing: border-box;
+}
+
+.remoteVideoContainer {
+    width: 100%;
+    height: 100%;
+    max-height: 48vh;
+    background-color: #101424;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.remoteVideoContainer:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+.remoteVideoContainer video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Controls Bar */
+.buttonContainers {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.8rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
+    z-index: 10;
+}
+
+.buttonContainers button {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    width: 56px;
+    height: 56px;
+    border-radius: 50% !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.buttonContainers button:hover {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-3px) scale(1.05);
+}
+
+.buttonContainers button.MuiIconButton-root svg {
+    font-size: 1.8rem;
+}
+
+/* Red end-call button overrides */
+.buttonContainers button:has(svg[data-testid="CallEndIcon"]) {
+    background-color: rgba(244, 67, 54, 0.15) !important;
+    border-color: rgba(244, 67, 54, 0.3) !important;
+    color: #f44336 !important;
+}
+
+.buttonContainers button:has(svg[data-testid="CallEndIcon"]):hover {
+    background-color: #f44336 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+/* Chat Room Panel */
+.chatRoom {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 380px;
+    height: calc(100vh - 130px);
+    background-color: rgba(13, 17, 30, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    backdrop-filter: blur(25px);
+    box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 15;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+.chatContainer h1 {
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    text-transform: capitalize;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.8rem;
+}
+
+.chattingDisplay {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+    padding-right: 5px;
+}
+
+.chattingDisplay::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chattingDisplay::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+}
+
+.chattingDisplay p {
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.4;
+    font-size: 0.95rem;
+}
+
+.chattingArea {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.chattingArea .MuiTextField-root {
+    flex-grow: 1;
+}
+
+.chattingArea .MuiInputBase-root {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+}
+
+.chattingArea .MuiInputLabel-root {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.chattingArea .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #0E71EB !important;
+}
+
+.chattingArea button {
+    height: 56px;
+    background: linear-gradient(45deg, #0E71EB, #00d2ff);
+    font-weight: 700;
+    border-radius: 12px;
+    text-transform: none;
+    padding-inline: 1.5rem;
+}
+
+.chattingArea button:hover {
+    background: linear-gradient(45deg, #0c63cf, #00a2ff);
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+
+@media (max-width: 900px) {
+    .chatRoom {
+        width: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Lobby adjustments */
+    .lobbyContainer {
+        margin: 4rem auto;
+        padding: 2rem 1.5rem;
+    }
+
+    /* Video controls bottom bar */
+    .buttonContainers {
+        gap: 1rem;
+        height: 80px;
+    }
+    
+    .buttonContainers button {
+        width: 48px;
+        height: 48px;
+    }
+
+    .buttonContainers button.MuiIconButton-root svg {
+        font-size: 1.5rem;
+    }
+
+    /* Local Video position & size - Bottom Left */
+    .meetUserVideo {
+        bottom: 90px;
+        left: 15px; /* Aligned left on mobile */
+        width: 150px;
+        height: 100px;
+        border-radius: 12px;
+    }
+
+    /* Conference layout for small screens */
+    .conferenceView {
+        grid-template-columns: 1fr;
+        padding: 15px;
+        gap: 15px;
+        height: calc(100vh - 80px);
+    }
+
+    .remoteVideoContainer {
+        max-height: 38vh;
+    }
+
+    /* Chat takes full overlay on mobile */
+    .chatRoom {
+        top: 0;
+        right: 0;
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - 80px);
+        border-radius: 0;
+        border: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .lobbyContainer h2 {
+        font-size: 1.6rem;
+    }
+
+    .buttonContainers {
+        gap: 0.6rem;
+    }
+
+    /* Extra small screens local video size */
+    .meetUserVideo {
+        width: 120px;
+        height: 80px;
+    }
+}

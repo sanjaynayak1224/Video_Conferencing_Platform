@@ -1,6 +1,6 @@
 import { User } from "../models/user.model.js";
 import httpStatus from "http-status";
-import bcrypt,{hash} from "bcrypt";
+import bcrypt from "bcrypt";
 import crypto from "crypto";
 import {Meeting} from "../models/meeting.model.js"
 
@@ -61,7 +61,7 @@ const register=async(req,res)=>{
 
         res.status(httpStatus.CREATED).json({message:"User registered successfully"});  
     }catch(e){
-        res.json({message:`Something went wrong: ${e}`})
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:`Something went wrong: ${e}`})
     }
 
 }
@@ -71,9 +71,14 @@ const getUserHistory=async (req,res)=>{
 
     try{
         const user=await User.findOne({token:token})
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "User not found"});
+        }
         const meetings=await Meeting.find({user_id:user.username})
         res.json(meetings);
-    }catch(e){res.json({message:`Something went wrong ${e}`})}
+    }catch(e){
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:`Something went wrong ${e}`})
+    }
 
 }
 
@@ -83,6 +88,9 @@ const addToHistory=async(req,res)=>{
 
     try{
         const user=await User.findOne({token:token})
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "User not found"});
+        }
         const newMeeting=new Meeting({
             user_id:user.username,
             meetingCode:meeting_code
@@ -90,8 +98,10 @@ const addToHistory=async(req,res)=>{
 
         await newMeeting.save();
 
-        res.status(httpStatus.CREATED.json({message: "Added code to history"}))
-    }catch(e){res.json({message:`Something went wrong ${e}`})}
+        res.status(httpStatus.CREATED).json({message: "Added code to history"})
+    }catch(e){
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message:`Something went wrong ${e}`})
+    }
 }
 
 

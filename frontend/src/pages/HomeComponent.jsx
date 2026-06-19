@@ -1,7 +1,8 @@
-import React, { useContext, useState } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { useContext, useState } from 'react'
 import WithAuth from '../utils/WithAuth.jsx'
 import { useNavigate } from 'react-router-dom'
-import "../App.css"
+import "./HomeComponent.css"
 import IconButton from '@mui/material/IconButton';
 import RestoreIcon from '@mui/icons-material/Restore';
 import Button from '@mui/material/Button';
@@ -18,63 +19,62 @@ function HomeComponent() {
   const {addToUserHistory}=useContext(AuthContext)
 
   let handleJoinVideoCall = () => {
-      addToUserHistory(meetingCode)
-      navigate(`/${meetingCode}`)
+      if (!meetingCode.trim()) {
+          alert("Please enter a meeting code.");
+          return;
+      }
+      addToUserHistory(meetingCode);
+      navigate(`/${meetingCode}`);
   }
 
 
   return (  
-    <>  
+    <div className="homePageContainer">  
         <div className="navBar">
 
-        <div style={{display: 'flex', alignItems: 'center'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <h2>Apna Video Call</h2>
+          </div>
 
-          <h2>Apna Video Call</h2>
-        </div>
-
-        <div style={{display: 'flex', alignItems: 'center'}}>
-
-          <IconButton onClick={
-            ()=>{
-              navigate("/history")
-            }
-          }>
-              <RestoreIcon/>
-          </IconButton>
-          <p>History</p>
-          <Button onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/auth");
-          }}>Logout</Button>
-        </div>
-        
-    </div>
-
+          <div className="navActions">
+            <div className="historyBtn" onClick={() => navigate("/history")}>
+              <IconButton color="inherit">
+                <RestoreIcon />
+              </IconButton>
+              <p>History</p>
+            </div>
+            <Button className="logoutBtn" onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/auth");
+            }}>Logout</Button>
+          </div>
           
-    <div className="meetContainer">
+        </div>
+
+        <div className="meetContainer">
 
           <div className="leftPanel">
-            <div>
+            <div className="joinCard">
                 <h2>Providing Quality Video Call just like Quality Education</h2>
 
-                <div style={{display:"flex",gap:"10px"}}>
-
-                    <TextField onChange={e=>{setMeetingCode(e.target.value)}}></TextField>
-                    <Button onClick={handleJoinVideoCall} variant="contained">Join</Button>
-
+                <div className="joinInputGroup">
+                    <TextField 
+                      className="meetInput"
+                      placeholder="Enter meeting code"
+                      variant="outlined"
+                      onChange={e => setMeetingCode(e.target.value)}
+                    />
+                    <Button onClick={handleJoinVideoCall} variant="contained" className="joinBtn">Join</Button>
                 </div>
             </div>
           </div>
 
           <div className="rightPanel">
-            <img srcSet="./logo.svg"></img>
+            <img src="/logo.svg" alt="logo" className="heroLogo" />
           </div>
 
-
+        </div>
     </div>
-
-    </>
-    
   )
 }
 

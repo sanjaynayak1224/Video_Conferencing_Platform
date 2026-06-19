@@ -1,3 +1,14 @@
 {
-    "recommendations": []
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "dsznajder.es7-react-js-snippets",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "mikestead.dotenv",
+        "humao.rest-client",
+        "formulahendry.auto-close-tag",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker"
+    ]
 }

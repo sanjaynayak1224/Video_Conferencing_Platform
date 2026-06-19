@@ -1,0 +1,139 @@
+/* History Page Styles */
+.historyContainer {
+    width: 100vw;
+    min-height: 100vh;
+    padding: 3rem 4rem;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+.historyHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 1.2rem;
+}
+
+.historyHeader h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.homeButton {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.homeButton:hover {
+    background-color: #0E71EB !important;
+    border-color: #0E71EB !important;
+    color: #ffffff !important;
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14, 113, 235, 0.35);
+}
+
+.homeButton svg {
+    font-size: 1.6rem;
+}
+
+/* Responsive History Cards Grid */
+.historyCardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.8rem;
+    width: 100%;
+}
+
+.historyCard {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.historyCard:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(14, 113, 235, 0.12) !important;
+    border-color: rgba(14, 113, 235, 0.45) !important;
+}
+
+.historyCard .MuiCardContent-root {
+    padding: 1.8rem;
+}
+
+.cardCode {
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 1rem !important;
+    letter-spacing: -0.3px;
+    display: inline-block;
+    padding-bottom: 4px;
+    border-bottom: 2px solid rgba(14, 113, 235, 0.5);
+}
+
+.cardDate, .cardUserId {
+    font-size: 0.95rem !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    margin-bottom: 0.6rem !important;
+}
+
+.noMeetings {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 5rem 0;
+}
+
+/* RESPONSIVE LAYOUTS */
+@media (max-width: 1024px) {
+    .historyContainer {
+        padding: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .historyHeader {
+        margin-bottom: 2rem;
+        gap: 1.2rem;
+    }
+
+    .historyHeader h2 {
+        font-size: 1.8rem;
+    }
+
+    .historyCardsGrid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .historyContainer {
+        padding: 2rem 1.5rem;
+    }
+
+    .historyHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .historyCardsGrid {
+        grid-template-columns: 1fr;
+    }
+}

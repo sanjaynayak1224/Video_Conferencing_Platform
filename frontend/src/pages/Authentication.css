@@ -1,0 +1,212 @@
+/* Authentication Page Styles */
+.authContainer {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(7, 9, 19, 0.85) 0%, rgba(13, 17, 39, 0.9) 100%), url('/signInImage.avif') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    padding: 1.5rem;
+    box-sizing: border-box;
+}
+
+/* Authentication Card styling */
+.authCard {
+    background-color: rgba(13, 17, 39, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 24px !important;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+    width: 100%;
+    max-width: 460px;
+    padding: 3rem 2.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.authBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Avatar Lock Indicator */
+.authAvatar {
+    background-color: rgba(14, 113, 235, 0.1) !important;
+    border: 1px solid rgba(14, 113, 235, 0.25) !important;
+    color: #0E71EB !important;
+    box-shadow: 0 4px 15px rgba(14, 113, 235, 0.15);
+    margin-bottom: 0.5rem;
+    width: 48px;
+    height: 48px;
+}
+
+.authAvatar svg {
+    font-size: 1.5rem;
+}
+
+/* Headings */
+.authHeader {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-top: 1.2rem;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.8px;
+    background: linear-gradient(135deg, #ffffff, #dcdadc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+.authSubHeader {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 0;
+    margin-bottom: 2.2rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Form Tabs Header */
+.tabContainer {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.tabContainer button {
+    font-weight: 700;
+    text-transform: none;
+    padding: 0.6rem 2.2rem;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tabContainer button.MuiButton-contained {
+    background: linear-gradient(135deg, #0E71EB, #00d2ff) !important;
+    box-shadow: 0 6px 20px rgba(14, 113, 235, 0.3) !important;
+    color: #ffffff !important;
+}
+
+.tabContainer button.MuiButton-contained:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(14, 113, 235, 0.45) !important;
+}
+
+.tabContainer button:not(.MuiButton-contained) {
+    color: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.tabContainer button:not(.MuiButton-contained):hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-color: #0E71EB !important;
+    color: #0E71EB !important;
+    transform: translateY(-2px);
+}
+
+/* Form layout */
+.authForm {
+    width: 100%;
+}
+
+/* Inputs styling */
+.MuiFormLabel-root.MuiInputLabel-root {
+    font-family: 'Inter', sans-serif;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root {
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    transition: all 0.25s ease;
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(14, 113, 235, 0.3) !important;
+}
+
+.MuiInputBase-root.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #0E71EB !important;
+    box-shadow: 0 0 15px rgba(14, 113, 235, 0.1);
+}
+
+.MuiFormLabel-root.MuiInputLabel-root.Mui-focused {
+    color: #0E71EB !important;
+}
+
+.MuiInputBase-input.MuiOutlinedInput-input {
+    color: #ffffff !important;
+}
+
+/* Submit button */
+.submitButton {
+    height: 52px;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #0E71EB, #00d2ff) !important;
+    box-shadow: 0 8px 24px rgba(14, 113, 235, 0.3) !important;
+    margin-top: 2rem !important;
+    color: #ffffff !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(14, 113, 235, 0.5) !important;
+}
+
+/* Error text styling */
+.authError {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-block: 0.8rem;
+    color: #ff5252 !important;
+    text-align: center;
+}
+
+/* RESPONSIVE LAYOUTS */
+@media (max-width: 600px) {
+    .authCard {
+        padding: 2rem 1.5rem;
+    }
+
+    .authHeader {
+        font-size: 1.8rem;
+    }
+
+    .authSubHeader {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tabContainer {
+        margin-bottom: 1.5rem;
+    }
+
+    .tabContainer button {
+        padding: 0.5rem 1.4rem;
+        font-size: 0.9rem;
+    }
+}

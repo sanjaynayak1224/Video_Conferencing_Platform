@@ -1,0 +1,298 @@
+/* HomeComponent Styles */
+.homePageContainer {
+    background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+.navBar {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    padding-inline: 4rem;
+    padding-block: 1.2rem;
+    background: rgba(13, 17, 39, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.navBar h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #0E71EB, #00d2ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+/* Navbar Actions Container */
+.navActions {
+    display: flex;
+    align-items: center;
+    gap: 1.8rem;
+}
+
+/* History Nav Button */
+.historyBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.historyBtn:hover {
+    color: #0E71EB;
+    transform: translateY(-1px);
+}
+
+.historyBtn .MuiIconButton-root {
+    color: inherit !important;
+    padding: 6px !important;
+}
+
+.historyBtn p {
+    font-weight: 600;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Logout Button */
+.logoutBtn {
+    border: 1px solid rgba(14, 113, 235, 0.3) !important;
+    background-color: rgba(14, 113, 235, 0.04) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    font-size: 0.95rem !important;
+    border-radius: 20px !important;
+    padding: 0.5rem 1.4rem !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.logoutBtn:hover {
+    color: #ffffff !important;
+    background-color: #0E71EB !important;
+    border-color: #0E71EB !important;
+    box-shadow: 0 4px 15px rgba(14, 113, 235, 0.35) !important;
+    transform: translateY(-2px);
+}
+
+/* Meet Container Panels */
+.meetContainer { 
+    display: flex;
+    padding-inline: 6rem;
+    flex-grow: 1;
+    height: calc(100vh - 73px);
+    gap: 6vw;
+    justify-content: center;
+    align-items: center;
+}
+
+.leftPanel {
+    flex: 1.2;
+    display: flex;
+    align-items: center;
+}
+
+.joinCard {
+    width: 100%;
+}
+
+.leftPanel h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.35;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    letter-spacing: -0.8px;
+}
+
+/* Input Group */
+.joinInputGroup {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Custom Text input wrapper overrides */
+.meetInput {
+    flex-grow: 1;
+}
+
+.meetInput .MuiInputBase-root {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px;
+    height: 56px;
+    transition: all 0.25s ease;
+}
+
+.meetInput .MuiInputBase-root:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.meetInput .MuiOutlinedInput-notchedOutline {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.meetInput:hover .MuiOutlinedInput-notchedOutline {
+    border-color: rgba(14, 113, 235, 0.4) !important;
+}
+
+.meetInput .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #0E71EB !important;
+    box-shadow: 0 0 15px rgba(14, 113, 235, 0.15) !important;
+}
+
+.meetInput input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+    opacity: 1 !important;
+}
+
+/* Join Button */
+.joinBtn {
+    height: 56px;
+    padding-inline: 2.2rem !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #0E71EB, #00d2ff) !important;
+    box-shadow: 0 8px 24px rgba(14, 113, 235, 0.3) !important;
+    text-transform: none !important;
+    font-size: 1.1rem !important;
+    color: #ffffff !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.joinBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(14, 113, 235, 0.5) !important;
+}
+
+.rightPanel {
+    flex: 0.8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes logoFloat {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.heroLogo {
+    width: 26vw;
+    height: auto;
+    max-width: 100%;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: logoFloat 6s ease-in-out infinite;
+}
+
+/* RESPONSIVE LAYOUTS */
+@media (max-width: 1024px) {
+    .navBar {
+        padding-inline: 2rem;
+    }
+
+    .meetContainer {
+        padding-inline: 3rem;
+        gap: 4vw;
+    }
+
+    .leftPanel h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navBar {
+        flex-direction: column;
+        gap: 1rem;
+        padding-block: 1.2rem;
+        text-align: center;
+    }
+
+    .meetContainer {
+        flex-direction: column-reverse;
+        padding-inline: 2rem;
+        padding-block: 4rem;
+        height: auto;
+        min-height: calc(100vh - 120px);
+        gap: 3rem;
+    }
+
+    .leftPanel {
+        align-items: center;
+        text-align: center;
+        width: 100%;
+    }
+
+    .leftPanel > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .leftPanel h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .joinInputGroup {
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .heroLogo {
+        width: 40vw;
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .leftPanel h2 {
+        font-size: 1.5rem;
+    }
+
+    .joinInputGroup {
+        flex-direction: column;
+        gap: 14px !important;
+    }
+
+    .meetInput {
+        width: 100%;
+    }
+
+    .joinBtn {
+        width: 100%;
+        height: 52px;
+    }
+
+    .heroLogo {
+        width: 55vw;
+    }
+}

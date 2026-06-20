@@ -117,6 +117,21 @@ export default function VideoMeetComponent() {
         showModalRef.current = showModal;
     }, [showModal]);
 
+    // Lock viewport scrolling when actively inside a meeting call
+    useEffect(() => {
+        if (!askForUsername) {
+            document.body.classList.add("meeting-active");
+            document.documentElement.classList.add("meeting-active");
+        } else {
+            document.body.classList.remove("meeting-active");
+            document.documentElement.classList.remove("meeting-active");
+        }
+        return () => {
+            document.body.classList.remove("meeting-active");
+            document.documentElement.classList.remove("meeting-active");
+        };
+    }, [askForUsername]);
+
 
 
 

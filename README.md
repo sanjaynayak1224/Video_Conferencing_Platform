@@ -17,9 +17,10 @@ A premium, high-fidelity, real-time video conferencing platform built on a moder
 ## 🌟 Core Features
 
 *   **⚡ Ultra-Low Latency Streaming**: Native peer-to-peer audio & video transmission powered by WebRTC (`RTCPeerConnection`) with Socket.io signaling.
+*   **🔄 Auto-Rejoin on Reload**: Routing built on `HashRouter` prevents "Page not found" 404 errors on dynamic reloads. Automatically caches user details and reconnects to the active room immediately.
 *   **🔒 Permissions Guard Lobby**: Intelligently inspects microphone and camera hardware before entrance. Guides and re-prompts the user inline if permission is denied, avoiding messy page refreshes.
-*   **🖥️ Seamless Screen Sharing**: Instant, one-click screen sharing using WebRTC track replacement so other participants never lose connection.
-*   **📱 Orientation-Aware UI**: Responsive layouts tailored for mobile, tablet, and desktop screens. Dynamically detects orientation changes (landscape vs. portrait on phones) and repositions elements (self-view PiP, control bar) for the best viewing angle.
+*   **🖥️ Narrated Screen Sharing**: One-click screen sharing with local microphone audio preserved (user voice remains audible to others). Sharing controls are always visible on all devices.
+*   **📱 Horizontal Video Carousel**: Implemented a horizontal scrolling flex carousel with snapping for meetings with 2+ participants, ensuring the main layout remains locked and controls never scroll out of view.
 *   **💬 In-Meet Chat Room**: Threaded messaging panel with dynamic notification badges (which automatically mute and reset while the chat panel is actively open) so you don't miss updates when focused elsewhere.
 *   **✨ Space-Dark Glassmorphic Theme**: Designed with custom HSL-tailored gradients, subtle CSS micro-animations, hover scaling, dynamic viewports (`100dvh`), and proper safe-area padding for iOS notches.
 
@@ -116,10 +117,8 @@ sequenceDiagram
 
 - **Self-view Mirroring & Positioning**: Built-in mirrored scaling (`transform: scaleX(-1)`) for local video inputs to look natural to users (remote views remain unmirrored). Positioned at the bottom-left corner of the screen across all screen sizes.
 - **Mobile Viewport Fix (`100dvh`)**: Avoids the classic mobile layout issue where address bars crop control buttons.
-- **Strict, Non-Overflowing CSS Video Grid**: 
-  - Uses dynamic row/column calculations instead of fixed aspect ratios to prevent page overflow on landscape or constrained viewports.
+- **Locked Page Viewport**: The overall page height is restricted (`height: 100dvh; overflow: hidden;`) to ensure the entire page never scrolls vertically. This keeps the bottom controls and local video PiP perfectly pinned at the bottom.
+- **Horizontal Video Carousel & Snap Alignment**:
   - **1 User**: Centered, bounded 16:9 video frame (prevents video stretching and pixelation on large screens).
-  - **2 Users**: 50/50 split layout (stacked on mobile portrait, side-by-side on desktop/landscape).
-  - **3-4 Users**: Balanced 2x2 grid.
-  - **5-6 Users**: Balanced 3x2 grid (2x3 on mobile portrait/tablet).
-  - **7+ Users**: Scrollable auto-rows layout utilizing safe `minmax()` boundaries (prevents squishing cells to 0px).
+  - **2+ Users**: Arranged in a horizontal scrolling flex layout (`overflow-x: auto; scroll-snap-type: x mandatory;`) with cards snapping cleanly to the center as the user swipes. 
+  - **Card Sizing**: Responsive card dimensions (width is `75vw` on desktop, `85vw` on mobile portrait, and `60vw` on mobile landscape) to match the screen orientation beautifully.

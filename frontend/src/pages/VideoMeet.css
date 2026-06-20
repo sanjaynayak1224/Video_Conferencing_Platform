@@ -155,38 +155,61 @@
     aspect-ratio: 16 / 9;
 }
 
-/* 2 peers — side by side (landscape friendly) */
-.conferenceView.count-2 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-}
-
-/* 3 peers — top row: 2, bottom: 1 centred */
-.conferenceView.count-3 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-.conferenceView.count-3 .remoteVideoContainer:last-child {
-    grid-column: 1 / -1;
-}
-
-/* 4 peers — 2×2 */
-.conferenceView.count-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-
-/* 5-6 peers — 3×2 */
+/* 2 peers or more — horizontal scrollable carousel to prevent vertical screen overflow and keep control bar static */
+.conferenceView.count-2,
+.conferenceView.count-3,
+.conferenceView.count-4,
 .conferenceView.count-5,
-.conferenceView.count-6 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+.conferenceView.count-6,
+.conferenceView.count-many {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-inline: 2rem !important;
+    gap: 1.5rem !important;
+    height: calc(100dvh - 120px) !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100% !important;
 }
 
-.conferenceView.count-many {
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: minmax(180px, 1fr);
-    overflow-y: auto;
+/* Scrollbar customization */
+.conferenceView::-webkit-scrollbar {
+    height: 8px;
+}
+.conferenceView::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+.conferenceView::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Remote video card within the carousel */
+.conferenceView.count-2 .remoteVideoContainer,
+.conferenceView.count-3 .remoteVideoContainer,
+.conferenceView.count-4 .remoteVideoContainer,
+.conferenceView.count-5 .remoteVideoContainer,
+.conferenceView.count-6 .remoteVideoContainer,
+.conferenceView.count-many .remoteVideoContainer {
+    flex: 0 0 auto !important;
+    width: 75vw !important;
+    max-width: 600px !important;
+    height: 70% !important;
+    aspect-ratio: 16 / 9 !important;
+    scroll-snap-align: center !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important;
+    border-radius: 16px !important;
+    border: 2px solid rgba(255,255,255,0.06) !important;
+    background: #0f1222 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    margin: 0 !important;
 }
 
 /* ── Individual remote video cell ────────────────────────────────────────── */
@@ -350,22 +373,6 @@ button.endCallButton:hover,
 /* ── Tablet (≤ 900px) ─────────────────────────────────────────────────── */
 @media (max-width: 900px) {
     .chatRoom { width: 300px; }
-
-    .conferenceView.count-3,
-    .conferenceView.count-4 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .conferenceView.count-5,
-    .conferenceView.count-6 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: repeat(3, 1fr);
-    }
-    .conferenceView.count-many {
-        grid-template-columns: 1fr 1fr;
-        grid-auto-rows: minmax(180px, 1fr);
-        overflow-y: auto;
-    }
 }
 
 /* ── Mobile portrait (≤ 600px) ───────────────────────────────────────── */
@@ -387,30 +394,21 @@ button.endCallButton:hover,
         border-radius: 10px;
     }
 
-    /* Grid: everyone stacks in 1 column or 2 columns based on count */
+    /* Carousel height & card sizing on mobile portrait */
     .conferenceView {
-        height: calc(100dvh - 74px);
-        padding: 6px;
-        gap: 6px;
+        height: calc(100dvh - 74px) !important;
+        padding: 6px !important;
+        gap: 8px !important;
     }
-    .conferenceView.count-2 {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .conferenceView.count-3,
-    .conferenceView.count-4 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .conferenceView.count-5,
-    .conferenceView.count-6 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: repeat(3, 1fr);
-    }
-    .conferenceView.count-many {
-        grid-template-columns: 1fr 1fr;
-        grid-auto-rows: minmax(130px, 1fr);
-        overflow-y: auto;
+    
+    .conferenceView.count-2 .remoteVideoContainer,
+    .conferenceView.count-3 .remoteVideoContainer,
+    .conferenceView.count-4 .remoteVideoContainer,
+    .conferenceView.count-5 .remoteVideoContainer,
+    .conferenceView.count-6 .remoteVideoContainer,
+    .conferenceView.count-many .remoteVideoContainer {
+        width: 85vw !important;
+        height: 60% !important;
     }
     
     .remoteVideoContainer {
@@ -463,39 +461,21 @@ button.endCallButton:hover,
     .buttonContainers button { width: 40px; height: 40px; }
     .buttonContainers button.MuiIconButton-root svg { font-size: 1.2rem; }
 
-    /* Grid area takes full height minus thin control bar */
+    /* Carousel height & card sizing on mobile landscape */
     .conferenceView {
-        height: calc(100dvh - 60px);
-        padding: 4px;
-        gap: 4px;
+        height: calc(100dvh - 60px) !important;
+        padding: 4px !important;
+        gap: 8px !important;
     }
 
-    /* 2 people: side by side (perfect for landscape) */
-    .conferenceView.count-2 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr;
-    }
-
-    /* 3-4 people: 2 columns, short rows */
-    .conferenceView.count-3,
-    .conferenceView.count-4 {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .conferenceView.count-3 .remoteVideoContainer:last-child {
-        grid-column: 1 / -1;
-    }
-
-    /* 5-6: 3 columns */
-    .conferenceView.count-5,
-    .conferenceView.count-6 {
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .conferenceView.count-many {
-        grid-template-columns: repeat(3, 1fr);
-        grid-auto-rows: minmax(110px, 1fr);
-        overflow-y: auto;
+    .conferenceView.count-2 .remoteVideoContainer,
+    .conferenceView.count-3 .remoteVideoContainer,
+    .conferenceView.count-4 .remoteVideoContainer,
+    .conferenceView.count-5 .remoteVideoContainer,
+    .conferenceView.count-6 .remoteVideoContainer,
+    .conferenceView.count-many .remoteVideoContainer {
+        width: 60vw !important;
+        height: 75% !important;
     }
 
     /* Self-view PiP — small, bottom-left so it doesn't block other videos */

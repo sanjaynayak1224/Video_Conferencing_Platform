@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import "./VideoMeet.css";
 import TextField   from '@mui/material/TextField';
 import IconButton  from '@mui/material/IconButton';
@@ -77,6 +77,7 @@ function makeBlackSilenceStream() {
 // ────────────────────────────────────────────────────────────────────────────
 
 export default function VideoMeetComponent() {
+    const { url } = useParams();
 
     // ── Refs – stable identity, no re-render on mutation ──────────────────────
     const socketRef        = useRef(null);
@@ -95,13 +96,13 @@ export default function VideoMeetComponent() {
     const [video,           setVideo]           = useState(false);
     const [audio,           setAudio]           = useState(false);
     const [screen,          setScreenUI]        = useState(false);  // UI state only
-    const [screenAvailable, setScreenAvailable] = useState(false);
+    const [screenAvailable, setScreenAvailable] = useState(true);   // always default to true so the icon is visible
     const [showModal,       setModal]           = useState(false);
     const [messages,        setMessages]        = useState([]);
     const [message,         setMessage]         = useState("");
     const [newMessages,     setNewMessages]     = useState(0);
     const [askForUsername,  setAskForUsername]  = useState(true);
-    const [username,        setUsername]        = useState("");
+    const [username,        setUsername]        = useState(localStorage.getItem("apna_username") || "");
     const [videos,          setVideos]          = useState([]);
 
     const routeTo = useNavigate();
@@ -111,65 +112,7 @@ export default function VideoMeetComponent() {
         showModalRef.current = showModal;
     }, [showModal]);
 
-    // ── 1. Acquire permissions on mount ───────────────────────────────────────
-    useEffect(() => {
-        if (!navigator.mediaDevices) {
-            console.warn("navigator.mediaDevices unavailable – need HTTPS.");
-            return;
-        }
 
-        (async () => {
-            let hasVideo = false;
-            let hasAudio = false;
-            let combinedStream = null;
-
-            // Request video first
-            try {
-                combinedStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                hasVideo = true;
-            } catch (e) {
-                console.warn("Camera denied:", e.message);
-            }
-
-            // Small gap so browser shows sequential prompts
-            await new Promise(r => setTimeout(r, 300));
-
-            // Request audio
-            try {
-                const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                hasAudio = true;
-                if (combinedStream) {
-                    aStream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
-                } else {
-                    combinedStream = aStream;
-                }
-            } catch (e) {
-                console.warn("Mic denied:", e.message);
-            }
-
-            setVideoAvailable(hasVideo);
-            setAudioAvailable(hasAudio);
-            setScreenAvailable(!!navigator.mediaDevices.getDisplayMedia);
-
-            if (combinedStream) {
-                localStreamRef.current = combinedStream;
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = combinedStream;
-                }
-            }
-        })();
-
-        // Cleanup on unmount
-        return () => {
-            localStreamRef.current?.getTracks().forEach(t => t.stop());
-            localStreamRef.current = null;
-            Object.values(connectionsRef.current).forEach(pc => { try { pc.close(); } catch { /* ignored */ } });
-            connectionsRef.current  = {};
-            iceCandidateQRef.current = {};
-            socketRef.current?.disconnect();
-            socketRef.current = null;
-        };
-    }, []);
 
     // ── 2. Sync track.enabled when user toggles mic/camera ────────────────────
     useEffect(() => {
@@ -288,7 +231,7 @@ export default function VideoMeetComponent() {
 
         socket.on("connect", () => {
             console.log("[socket] connected, id =", socket.id);
-            socket.emit("join-call", window.location.pathname);
+            socket.emit("join-call", `/${url}`);
         });
 
         socket.on("connect_error", err => console.warn("[socket] connect_error:", err.message));
@@ -351,7 +294,86 @@ export default function VideoMeetComponent() {
                 });
             }
         });
-    }, [gotMessageFromServer, createPeerConnection]);
+    }, [gotMessageFromServer, createPeerConnection, url]);
+
+    // ── 1. Acquire permissions on mount ───────────────────────────────────────
+    useEffect(() => {
+        if (!navigator.mediaDevices) {
+            console.warn("navigator.mediaDevices unavailable – need HTTPS.");
+            return;
+        }
+
+        (async () => {
+            let hasVideo = false;
+            let hasAudio = false;
+            let combinedStream = null;
+
+            // Request video first
+            try {
+                combinedStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                hasVideo = true;
+            } catch (e) {
+                console.warn("Camera denied:", e.message);
+            }
+
+            // Small gap so browser shows sequential prompts
+            await new Promise(r => setTimeout(r, 300));
+
+            // Request audio
+            try {
+                const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                hasAudio = true;
+                if (combinedStream) {
+                    aStream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
+                } else {
+                    combinedStream = aStream;
+                }
+            } catch (e) {
+                console.warn("Mic denied:", e.message);
+            }
+
+            setVideoAvailable(hasVideo);
+            setAudioAvailable(hasAudio);
+            setScreenAvailable(true); // Force true so the screen share button shows on all devices
+
+            if (combinedStream) {
+                localStreamRef.current = combinedStream;
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = combinedStream;
+                }
+            }
+
+            // Auto-rejoin if username is already saved in localStorage and we are on a call route
+            const savedUsername = localStorage.getItem("apna_username");
+            if (savedUsername && savedUsername.trim() && url) {
+                setUsername(savedUsername.trim());
+                // Start with tracks disabled initially per requirement
+                if (combinedStream) {
+                    combinedStream.getVideoTracks().forEach(t => { t.enabled = false; });
+                    combinedStream.getAudioTracks().forEach(t => { t.enabled = false; });
+                }
+                setVideo(false);
+                setAudio(false);
+                setAskForUsername(false);
+                
+                // Trigger connection to socket server after a short delay
+                setTimeout(() => {
+                    connectToSocketServer();
+                }, 100);
+            }
+        })();
+
+        // Cleanup on unmount
+        return () => {
+            localStreamRef.current?.getTracks().forEach(t => t.stop());
+            localStreamRef.current = null;
+            Object.values(connectionsRef.current).forEach(pc => { try { pc.close(); } catch { /* ignored */ } });
+            connectionsRef.current  = {};
+            iceCandidateQRef.current = {};
+            socketRef.current?.disconnect();
+            socketRef.current = null;
+        };
+    }, [connectToSocketServer, url]);
 
     // ── 4. Join meeting ───────────────────────────────────────────────────────
     const connect = async () => {
@@ -361,6 +383,8 @@ export default function VideoMeetComponent() {
             alert("WebRTC requires HTTPS. Please open the deployed HTTPS URL.");
             return;
         }
+
+        localStorage.setItem("apna_username", username.trim());
 
         connectingRef.current = true;
         try {
@@ -460,22 +484,37 @@ export default function VideoMeetComponent() {
     }, []);
 
     const startScreenShare = useCallback(() => {
-        if (!navigator.mediaDevices?.getDisplayMedia) return;
+        if (!navigator.mediaDevices?.getDisplayMedia) {
+            alert("Screen sharing is not supported on this browser/device.");
+            return;
+        }
 
+        const micTrack = localStreamRef.current?.getAudioTracks()[0];
         navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
             .then(screenStream => {
                 screenActiveRef.current = true;
                 setScreenUI(true);
 
-                localStreamRef.current?.getTracks().forEach(t => t.stop());
-                localStreamRef.current = screenStream;
-                if (localVideoRef.current) localVideoRef.current.srcObject = screenStream;
+                // Stop only video tracks of the old stream, keeping microphone track alive
+                localStreamRef.current?.getVideoTracks().forEach(t => t.stop());
+
+                const screenVideoTrack = screenStream.getVideoTracks()[0];
+                const tracks = [screenVideoTrack];
+                if (micTrack) {
+                    tracks.push(micTrack);
+                } else {
+                    const screenAudioTrack = screenStream.getAudioTracks()[0];
+                    if (screenAudioTrack) tracks.push(screenAudioTrack);
+                }
+
+                const combinedStream = new MediaStream(tracks);
+                localStreamRef.current = combinedStream;
+                if (localVideoRef.current) localVideoRef.current.srcObject = combinedStream;
 
                 // Replace video track in all peer connections
                 Object.values(connectionsRef.current).forEach(pc => {
                     const sender = pc.getSenders().find(s => s.track?.kind === 'video');
-                    const newTrack = screenStream.getVideoTracks()[0];
-                    if (sender && newTrack) sender.replaceTrack(newTrack).catch(console.warn);
+                    if (sender && screenVideoTrack) sender.replaceTrack(screenVideoTrack).catch(console.warn);
                 });
 
                 // Auto-stop when user clicks browser's "Stop sharing"

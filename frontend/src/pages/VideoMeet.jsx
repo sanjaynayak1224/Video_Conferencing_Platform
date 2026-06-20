@@ -618,7 +618,7 @@ export default function VideoMeetComponent() {
                     />
 
                     {/* Remote participant videos */}
-                    <div className="conferenceView">
+                    <div className={`conferenceView count-${videos.length > 6 ? 'many' : videos.length}`}>
                         {videos.map(v => (
                             <div key={v.socketId} className="remoteVideoContainer">
                                 <video

@@ -1,15 +1,24 @@
-/* Video Meeting Page Styles */
+/* ═══════════════════════════════════════════════════════════════════════════
+   VideoMeet.css  —  fully responsive, orientation-aware meeting UI
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
 .meetMainPage {
     background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
     color: #ffffff;
+    width: 100%;
+    height: 100%;
     min-height: 100vh;
+    min-height: 100dvh;          /* dynamic viewport on mobile (avoids address-bar gap) */
     display: flex;
     flex-direction: column;
     font-family: 'Outfit', 'Inter', sans-serif;
     overflow: hidden;
 }
 
-/* Lobby Styling */
+/* ── Lobby ─────────────────────────────────────────────────────────────────── */
 .lobbyContainer {
     display: flex;
     flex-direction: column;
@@ -18,13 +27,13 @@
     padding: 2.5rem;
     max-width: 500px;
     width: 90%;
-    margin: 6rem auto;
+    margin: 5rem auto;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     backdrop-filter: blur(20px);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .lobbyContainer:hover {
@@ -33,7 +42,6 @@
 }
 
 .lobbyContainer h2 {
-    color: #ffffff;
     margin-bottom: 1.8rem;
     font-size: 2rem;
     font-weight: 700;
@@ -44,37 +52,13 @@
     -webkit-text-fill-color: transparent;
 }
 
-.lobbyContainer .MuiTextField-root {
-    width: 100%;
-    margin-bottom: 1.5rem;
-}
-
-.lobbyContainer .MuiInputBase-root {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    transition: all 0.2s ease;
-}
-
-.lobbyContainer .MuiInputBase-root:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.lobbyContainer .MuiOutlinedInput-notchedOutline {
-    border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-.lobbyContainer .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #0E71EB !important;
-}
-
-.lobbyContainer .MuiInputLabel-root {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.lobbyContainer .MuiInputLabel-root.Mui-focused {
-    color: #0E71EB !important;
-}
+.lobbyContainer .MuiTextField-root  { width: 100%; margin-bottom: 1.5rem; }
+.lobbyContainer .MuiInputBase-root  { color: #fff; background: rgba(255,255,255,0.04); border-radius: 12px; transition: background 0.2s; }
+.lobbyContainer .MuiInputBase-root:hover { background: rgba(255,255,255,0.08); }
+.lobbyContainer .MuiOutlinedInput-notchedOutline { border-color: rgba(255,255,255,0.15) !important; }
+.lobbyContainer .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color: #0E71EB !important; }
+.lobbyContainer .MuiInputLabel-root { color: rgba(255,255,255,0.5); }
+.lobbyContainer .MuiInputLabel-root.Mui-focused { color: #0E71EB !important; }
 
 .lobbyContainer button {
     width: 100%;
@@ -82,18 +66,17 @@
     font-weight: 700;
     border-radius: 12px;
     background: linear-gradient(45deg, #0E71EB, #00d2ff);
-    box-shadow: 0 4px 15px rgba(14, 113, 235, 0.3);
+    box-shadow: 0 4px 15px rgba(14,113,235,0.3);
     text-transform: none;
     font-size: 1.1rem;
     color: white;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .lobbyContainer button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(14, 113, 235, 0.5);
+    box-shadow: 0 6px 20px rgba(14,113,235,0.5);
 }
 
 .lobbyVideoContainer {
@@ -101,322 +84,431 @@
     margin-top: 2rem;
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.1);
     background: #000;
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    aspect-ratio: 16 / 9;
 }
-
 .lobbyVideoContainer video {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
+    transform: scaleX(-1);      /* mirror so lobby preview looks natural */
 }
 
-/* Meeting Room Layout */
+/* ── Meeting room wrapper ───────────────────────────────────────────────────── */
 .meetVideoContainer {
     position: relative;
-    width: 100vw;
-    height: 100vh;
-    background-color: #060810;
-    overflow: hidden;
-}
-
-/* Local User Video - Repositioned to Bottom Left */
-.meetUserVideo {
-    position: absolute;
-    bottom: 110px;
-    left: 20px;
-    width: 240px;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 16px;
-    border: 2px solid #0E71EB;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    z-index: 10;
-    background-color: #000;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.meetUserVideo:hover {
-    border-color: #00d2ff;
-    transform: scale(1.05);
-}
-
-/* Remote Videos Grid */
-.conferenceView {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    align-content: center;
-    gap: 20px;
-    padding: 20px;
-    height: calc(100vh - 110px);
     width: 100%;
-    box-sizing: border-box;
-    overflow-y: auto;
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #060810;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.remoteVideoContainer {
-    /* No fixed aspect-ratio — let the video's natural dimensions show */
-    flex: 1 1 320px;
-    max-width: 560px;
-    max-height: calc(100vh - 160px);
-    background-color: #101424;
-    border-radius: 20px;
-    overflow: hidden;
+/* ══════════════════════════════════════════════════════════════════════════════
+   CONFERENCE GRID  —  smart layout based on participant count
+   ══════════════════════════════════════════════════════════════════════════════
+   The grid fills the space above the control bar (height = 100dvh − 90px).
+   We use CSS grid so every cell is perfectly equal.                           */
+
+.conferenceView {
     position: relative;
-    border: 2px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    display: grid;
+    width: 100%;
+    height: calc(100dvh - 90px);   /* leave room for control bar */
+    gap: 8px;
+    padding: 8px;
+    overflow: hidden;
+    align-items: stretch;
+    justify-items: stretch;
+}
+
+/* 0 remote peers — empty state, no grid needed */
+.conferenceView.count-0 {
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
-.remoteVideoContainer:hover {
-    border-color: rgba(14, 113, 235, 0.3);
-    box-shadow: 0 12px 35px rgba(14, 113, 235, 0.15);
+.conferenceView.count-0::after {
+    content: "Waiting for others to join…";
+    color: rgba(255,255,255,0.3);
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
 }
 
-/* Video fills the container width; height follows natural aspect ratio */
+/* 1 peer — full screen */
+.conferenceView.count-1 {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+}
+
+/* 2 peers — side by side (landscape friendly) */
+.conferenceView.count-2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+/* 3 peers — top row: 2, bottom: 1 centred */
+.conferenceView.count-3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+.conferenceView.count-3 .remoteVideoContainer:last-child {
+    grid-column: 1 / -1;
+}
+
+/* 4 peers — 2×2 */
+.conferenceView.count-4 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+/* 5-6 peers — 3×2 */
+.conferenceView.count-5,
+.conferenceView.count-6 {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.conferenceView.count-many {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    overflow-y: auto;
+}
+
+/* ── Individual remote video cell ────────────────────────────────────────── */
+.remoteVideoContainer {
+    position: relative;
+    background: #101424;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-height: 0;   /* critical: allow grid children to shrink */
+}
+.remoteVideoContainer:hover {
+    border-color: rgba(14,113,235,0.35);
+    box-shadow: 0 8px 28px rgba(14,113,235,0.15);
+}
 .remoteVideoContainer video {
     width: 100%;
-    height: auto;        /* portrait (9:16) phones display correctly */
-    max-height: calc(100vh - 160px);
-    object-fit: contain; /* never crop — show full frame regardless of orientation */
+    height: 100%;
+    object-fit: cover;
     display: block;
-    border-radius: 18px;
 }
 
-/* Controls Bar */
+/* ── Local (self) picture-in-picture video ──────────────────────────────────── */
+.meetUserVideo {
+    position: absolute;
+    bottom: 100px;
+    right: 16px;
+    width: 200px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 2px solid #0E71EB;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 20;
+    background: #000;
+    transition: width 0.3s ease, bottom 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+    transform: scaleX(-1);       /* mirror self-view so it looks natural */
+    cursor: grab;
+}
+.meetUserVideo:hover {
+    border-color: #00d2ff;
+    transform: scaleX(-1) scale(1.04);
+}
+
+/* ── Control bar ─────────────────────────────────────────────────────────── */
 .buttonContainers {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.8rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
-    z-index: 10;
+    gap: 1.6rem;
+    background: linear-gradient(to top,
+        rgba(0,0,0,0.96) 0%,
+        rgba(0,0,0,0.6) 55%,
+        transparent 100%);
+    z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom, 0px); /* iOS safe area */
 }
 
 .buttonContainers button {
-    background-color: rgba(255, 255, 255, 0.06) !important;
+    background-color: rgba(255,255,255,0.07) !important;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: #fff !important;
     width: 56px;
     height: 56px;
     border-radius: 50% !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+    flex-shrink: 0;
 }
-
 .buttonContainers button:hover {
-    background-color: rgba(255, 255, 255, 0.18) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-3px) scale(1.05);
+    background-color: rgba(255,255,255,0.18) !important;
+    transform: translateY(-3px) scale(1.06);
 }
+.buttonContainers button.MuiIconButton-root svg { font-size: 1.7rem; }
 
-.buttonContainers button.MuiIconButton-root svg {
-    font-size: 1.8rem;
-}
-
-/* Red end-call button overrides */
-.buttonContainers button.endCallButton,
-.buttonContainers .endCallButton,
-button.endCallButton {
+/* Red end-call button */
+button.endCallButton,
+.buttonContainers .endCallButton {
     background-color: #f44336 !important;
-    border-color: rgba(244, 67, 54, 0.5) !important;
-    color: #ffffff !important;
+    border-color: rgba(244,67,54,0.4) !important;
 }
-
-.buttonContainers button.endCallButton:hover,
-.buttonContainers .endCallButton:hover,
-button.endCallButton:hover {
+button.endCallButton:hover,
+.buttonContainers .endCallButton:hover {
     background-color: #d32f2f !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4) !important;
-    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 4px 16px rgba(244,67,54,0.45) !important;
+    transform: translateY(-3px) scale(1.06) !important;
 }
 
-/* Chat Room Panel */
+/* ── Chat panel ──────────────────────────────────────────────────────────── */
 .chatRoom {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 380px;
-    height: calc(100vh - 130px);
-    background-color: rgba(13, 17, 30, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    backdrop-filter: blur(25px);
-    box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.5);
-    z-index: 15;
+    top: 16px;
+    right: 16px;
+    width: 360px;
+    height: calc(100dvh - 120px);
+    background: rgba(10,14,28,0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(24px);
+    box-shadow: -8px 8px 36px rgba(0,0,0,0.5);
+    z-index: 25;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInChat 0.25s ease;
+}
+@keyframes slideInChat {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
 }
 
 .chatContainer {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 1.5rem;
-    box-sizing: border-box;
+    padding: 1.4rem;
 }
-
 .chatContainer h1 {
-    font-size: 1.5rem;
-    margin: 0 0 1rem 0;
-    text-transform: capitalize;
-    color: #ffffff;
+    font-size: 1.4rem;
+    margin: 0 0 0.8rem;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.8rem;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 0.7rem;
 }
-
 .chattingDisplay {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
-    margin-bottom: 1.5rem;
-    padding-right: 5px;
+    margin-bottom: 1rem;
+    padding-right: 4px;
 }
+.chattingDisplay::-webkit-scrollbar { width: 5px; }
+.chattingDisplay::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 3px; }
+.chattingDisplay p { color: rgba(255,255,255,0.85); line-height: 1.4; font-size: 0.92rem; margin: 0; }
 
-.chattingDisplay::-webkit-scrollbar {
-    width: 6px;
-}
-
-.chattingDisplay::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-}
-
-.chattingDisplay p {
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.4;
-    font-size: 0.95rem;
-}
-
-.chattingArea {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.chattingArea .MuiTextField-root {
-    flex-grow: 1;
-}
-
-.chattingArea .MuiInputBase-root {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-}
-
-.chattingArea .MuiInputLabel-root {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.chattingArea .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #0E71EB !important;
-}
-
+.chattingArea { display: flex; gap: 10px; align-items: center; }
+.chattingArea .MuiTextField-root { flex: 1; }
+.chattingArea .MuiInputBase-root { color: #fff; background: rgba(255,255,255,0.04); border-radius: 10px; }
+.chattingArea .MuiInputLabel-root { color: rgba(255,255,255,0.4); }
+.chattingArea .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color: #0E71EB !important; }
 .chattingArea button {
-    height: 56px;
+    height: 52px;
     background: linear-gradient(45deg, #0E71EB, #00d2ff);
     font-weight: 700;
-    border-radius: 12px;
+    border-radius: 10px;
     text-transform: none;
-    padding-inline: 1.5rem;
+    padding-inline: 1.2rem;
+    white-space: nowrap;
 }
+.chattingArea button:hover { background: linear-gradient(45deg, #0c63cf, #00aaff); }
 
-.chattingArea button:hover {
-    background: linear-gradient(45deg, #0c63cf, #00a2ff);
-}
+/* ══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE  —  ordered from widest → narrowest, then orientation overrides
+   ══════════════════════════════════════════════════════════════════════════════ */
 
-/* RESPONSIVE MEDIA QUERIES */
-
+/* ── Tablet (≤ 900px) ─────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-    .chatRoom {
-        width: 320px;
+    .chatRoom { width: 300px; }
+
+    /* On tablet, 2+ people stack 1 per row for readability */
+    .conferenceView.count-3,
+    .conferenceView.count-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+    .conferenceView.count-5,
+    .conferenceView.count-6,
+    .conferenceView.count-many {
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: auto;
     }
 }
 
-@media (max-width: 768px) {
-    /* Lobby adjustments */
-    .lobbyContainer {
-        margin: 4rem auto;
-        padding: 2rem 1.5rem;
-    }
+/* ── Mobile portrait (≤ 600px) ───────────────────────────────────────── */
+@media (max-width: 600px) {
+    /* Lobby */
+    .lobbyContainer { margin: 3rem auto; padding: 1.8rem 1.2rem; }
+    .lobbyContainer h2 { font-size: 1.6rem; }
 
-    /* Video controls bottom bar */
-    .buttonContainers {
-        gap: 1rem;
-        height: 80px;
-    }
-    
-    .buttonContainers button {
-        width: 48px;
-        height: 48px;
-    }
+    /* Controls */
+    .buttonContainers { height: 74px; gap: 0.9rem; }
+    .buttonContainers button { width: 46px; height: 46px; }
+    .buttonContainers button.MuiIconButton-root svg { font-size: 1.4rem; }
 
-    .buttonContainers button.MuiIconButton-root svg {
-        font-size: 1.5rem;
-    }
-
-    /* Local Video position & size - Bottom Left */
+    /* Self-view PiP */
     .meetUserVideo {
-        bottom: 95px;
-        left: 15px;
-        width: 140px;
-        aspect-ratio: 16 / 9;
+        width: 110px;
+        bottom: 84px;
+        right: 10px;
+        border-radius: 10px;
+    }
+
+    /* Grid: everyone stacks in 1 column */
+    .conferenceView {
+        height: calc(100dvh - 74px);
+        padding: 6px;
+        gap: 6px;
+    }
+    .conferenceView.count-1,
+    .conferenceView.count-2,
+    .conferenceView.count-3,
+    .conferenceView.count-4,
+    .conferenceView.count-5,
+    .conferenceView.count-6,
+    .conferenceView.count-many {
+        grid-template-columns: 1fr;
+        grid-auto-rows: auto;
+        overflow-y: auto;
+    }
+    /* Override the span for count-3 last child */
+    .conferenceView.count-3 .remoteVideoContainer:last-child {
+        grid-column: auto;
+    }
+    .remoteVideoContainer {
+        aspect-ratio: 16 / 9;  /* force 16:9 so videos look right in single-column */
         border-radius: 12px;
     }
 
-    /* Conference layout for small screens */
-    .conferenceView {
-        flex-direction: column;
-        padding: 15px;
-        gap: 15px;
-        height: calc(100vh - 80px);
-        overflow-y: auto;
-    }
-
-    .remoteVideoContainer {
-        flex: 1 1 100%;
-        max-width: 100%;
-        max-height: 40vh;
-    }
-
-    /* Chat takes full overlay on mobile */
+    /* Chat full-screen overlay on mobile */
     .chatRoom {
-        top: 0;
-        right: 0;
-        left: 0;
-        width: 100vw;
-        height: calc(100vh - 80px);
+        inset: 0;
+        width: 100%;
+        height: calc(100dvh - 74px);
         border-radius: 0;
         border: none;
+        top: 0;
+        right: 0;
     }
 }
 
-@media (max-width: 480px) {
-    .lobbyContainer h2 {
-        font-size: 1.6rem;
+/* ── Mobile LANDSCAPE ─────────────────────────────────────────────────────
+   Triggered by both orientation:landscape and a short screen height.
+   On a phone in landscape the viewport is ~360-430px tall.               */
+@media (orientation: landscape) and (max-height: 500px) {
+
+    /* Lobby — compact horizontal */
+    .lobbyContainer {
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 95vw;
+        margin: 1rem auto;
+        padding: 1rem 1.2rem;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    .lobbyContainer h2 { width: 100%; margin-bottom: 0.5rem; font-size: 1.3rem; }
+    .lobbyContainer .MuiTextField-root { margin-bottom: 0; flex: 1; min-width: 180px; }
+    .lobbyContainer button { flex: 0 0 auto; width: auto; padding: 0.6rem 1.4rem; }
+    .lobbyVideoContainer {
+        width: 280px;
+        flex-shrink: 0;
+        margin-top: 0;
+        max-height: calc(100dvh - 80px);
     }
 
+    /* Control bar — thinner, on the right side in landscape */
     .buttonContainers {
-        gap: 0.6rem;
+        height: 60px;
+        gap: 1rem;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .buttonContainers button { width: 40px; height: 40px; }
+    .buttonContainers button.MuiIconButton-root svg { font-size: 1.2rem; }
+
+    /* Grid area takes full height minus thin control bar */
+    .conferenceView {
+        height: calc(100dvh - 60px);
+        padding: 4px;
+        gap: 4px;
     }
 
-    /* Extra small screens local video size */
+    /* 1 person: full width */
+    .conferenceView.count-1 {
+        grid-template-columns: 1fr;
+    }
+
+    /* 2 people: side by side (perfect for landscape) */
+    .conferenceView.count-2 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    /* 3-4 people: 2 columns, short rows */
+    .conferenceView.count-3,
+    .conferenceView.count-4 {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    .conferenceView.count-3 .remoteVideoContainer:last-child {
+        grid-column: 1 / -1;
+    }
+
+    /* 5-6: 3 columns */
+    .conferenceView.count-5,
+    .conferenceView.count-6,
+    .conferenceView.count-many {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-auto-rows: 1fr;
+        overflow-y: auto;
+    }
+
+    /* Self-view PiP — small, bottom-left so it doesn't block other videos */
     .meetUserVideo {
         width: 100px;
-        aspect-ratio: 16 / 9;
+        bottom: 68px;
+        right: 8px;
+        border-radius: 8px;
     }
+
+    /* Chat panel — take right half of screen */
+    .chatRoom {
+        top: 0;
+        right: 0;
+        bottom: 60px;
+        left: auto;
+        width: 50vw;
+        height: calc(100dvh - 60px);
+        border-radius: 0;
+        border-left: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+/* ── Very small screens (iPhone SE, etc.) ─────────────────────────────── */
+@media (max-width: 375px) {
+    .buttonContainers { gap: 0.5rem; }
+    .meetUserVideo { width: 90px; }
+    .lobbyContainer h2 { font-size: 1.4rem; }
 }

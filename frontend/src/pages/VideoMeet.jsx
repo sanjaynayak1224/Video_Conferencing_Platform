@@ -386,12 +386,14 @@ export default function VideoMeetComponent() {
                 }
             }
 
-            // Enable all tracks so the remote side immediately sees/hears us
-            stream.getVideoTracks().forEach(t => { t.enabled = true; });
-            stream.getAudioTracks().forEach(t => { t.enabled = true; });
+            // Start with camera and mic OFF — user must explicitly turn them on.
+            // Tracks are still added to the peer connection so WebRTC negotiation
+            // succeeds; enabled=false just sends black frames / silence.
+            stream.getVideoTracks().forEach(t => { t.enabled = false; });
+            stream.getAudioTracks().forEach(t => { t.enabled = false; });
 
-            setVideo(stream.getVideoTracks().length > 0);
-            setAudio(stream.getAudioTracks().length > 0);
+            setVideo(false);
+            setAudio(false);
 
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = stream;

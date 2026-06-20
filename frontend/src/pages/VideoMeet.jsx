@@ -14,10 +14,13 @@ import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import Button  from '@mui/material/Button';
 import Badge   from '@mui/material/Badge';
 import ChatIcon from '@mui/icons-material/Chat';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import io from "socket.io-client";
 import server from '../environment';
 
 const server_url = server;
+const VIDEOS_PER_PAGE = 4;
 
 const peerConfigConnections = {
     iceServers: [
@@ -104,6 +107,7 @@ export default function VideoMeetComponent() {
     const [askForUsername,  setAskForUsername]  = useState(true);
     const [username,        setUsername]        = useState(localStorage.getItem("apna_username") || "");
     const [videos,          setVideos]          = useState([]);
+    const [currentPage,     setCurrentPage]     = useState(0);
 
     const routeTo = useNavigate();
 
@@ -111,6 +115,8 @@ export default function VideoMeetComponent() {
     useEffect(() => {
         showModalRef.current = showModal;
     }, [showModal]);
+
+
 
 
 
@@ -574,6 +580,13 @@ export default function VideoMeetComponent() {
     };
 
     // ── Render ────────────────────────────────────────────────────────────────
+    const maxPage = Math.max(0, Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1);
+    if (currentPage > maxPage) {
+        setCurrentPage(maxPage);
+    }
+
+    const visibleVideos = videos.slice(currentPage * VIDEOS_PER_PAGE, (currentPage + 1) * VIDEOS_PER_PAGE);
+
     return (
         <div className="meetMainPage">
 
@@ -605,7 +618,26 @@ export default function VideoMeetComponent() {
 
             ) : (
                 /* ── Meeting room ── */
-                <div className="meetVideoContainer">
+                <div className={`meetVideoContainer ${showModal ? 'chatRoomOpen' : ''}`}>
+
+                    {videos.length > VIDEOS_PER_PAGE && (
+                        <>
+                            <IconButton 
+                                className="carouselArrow leftArrow" 
+                                disabled={currentPage === 0} 
+                                onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                            >
+                                <ChevronLeftIcon />
+                            </IconButton>
+                            <IconButton 
+                                className="carouselArrow rightArrow" 
+                                disabled={currentPage >= Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1} 
+                                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1, prev + 1))}
+                            >
+                                <ChevronRightIcon />
+                            </IconButton>
+                        </>
+                    )}
 
                     {/* Chat panel */}
                     {showModal && (
@@ -680,8 +712,8 @@ export default function VideoMeetComponent() {
                     />
 
                     {/* Remote participant videos */}
-                    <div className={`conferenceView count-${videos.length > 6 ? 'many' : videos.length}`}>
-                        {videos.map(v => (
+                    <div className={`conferenceView visible-${visibleVideos.length}`}>
+                        {visibleVideos.map(v => (
                             <div key={v.socketId} className="remoteVideoContainer">
                                 <video
                                     playsInline autoPlay

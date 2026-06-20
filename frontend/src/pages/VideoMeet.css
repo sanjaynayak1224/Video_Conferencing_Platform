@@ -208,7 +208,7 @@
 .meetUserVideo {
     position: absolute;
     bottom: 100px;
-    right: 16px;
+    left: 16px;
     width: 200px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
@@ -372,7 +372,7 @@ button.endCallButton:hover,
     .meetUserVideo {
         width: 110px;
         bottom: 84px;
-        right: 10px;
+        left: 10px;
         border-radius: 10px;
     }
 
@@ -489,7 +489,7 @@ button.endCallButton:hover,
     .meetUserVideo {
         width: 100px;
         bottom: 68px;
-        right: 8px;
+        left: 8px;
         border-radius: 8px;
     }
 

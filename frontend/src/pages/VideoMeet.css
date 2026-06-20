@@ -142,10 +142,17 @@
     letter-spacing: 0.02em;
 }
 
-/* 1 peer — full screen */
+/* 1 peer — centered clean frame */
 .conferenceView.count-1 {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.conferenceView.count-1 .remoteVideoContainer {
+    width: 90%;
+    max-width: 880px;
+    max-height: 100%;
+    aspect-ratio: 16 / 9;
 }
 
 /* 2 peers — side by side (landscape friendly) */
@@ -386,10 +393,6 @@ button.endCallButton:hover,
         padding: 6px;
         gap: 6px;
     }
-    .conferenceView.count-1 {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr;
-    }
     .conferenceView.count-2 {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
@@ -465,12 +468,6 @@ button.endCallButton:hover,
         height: calc(100dvh - 60px);
         padding: 4px;
         gap: 4px;
-    }
-
-    /* 1 person: full width */
-    .conferenceView.count-1 {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr;
     }
 
     /* 2 people: side by side (perfect for landscape) */

@@ -6,7 +6,7 @@
     background: linear-gradient(135deg, rgba(7, 9, 19, 0.85) 0%, rgba(13, 17, 39, 0.92) 100%), url("/background.jpg") no-repeat center center fixed;
     background-size: cover;
     color: white;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     font-family: 'Outfit', 'Inter', sans-serif;
     display: flex;
@@ -274,5 +274,10 @@
 
     .landingMainContainer :nth-child(2) > img {
         height: 28vh;
+    }
+}
+@media (max-width: 600px) {
+    .landingPageContainer {
+        overflow-y: auto;
     }
 }

@@ -4,7 +4,7 @@
     height: 100vh;
     height: 100dvh;
     display: flex;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     justify-content: center;
     align-items: center;
@@ -191,6 +191,9 @@
 
 /* RESPONSIVE LAYOUTS */
 @media (max-width: 600px) {
+    .authContainer {
+        overflow-y: auto;
+    }
     .authCard {
         padding: 2rem 1.5rem;
     }

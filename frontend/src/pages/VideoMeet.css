@@ -148,20 +148,21 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    align-content: center;
     gap: 20px;
     padding: 20px;
     height: calc(100vh - 110px);
     width: 100%;
     box-sizing: border-box;
     overflow-y: auto;
-    align-content: center;
 }
 
 .remoteVideoContainer {
-    flex: 1 1 45%;
-    max-width: 640px;
-    aspect-ratio: 16 / 9;
+    /* No fixed aspect-ratio — let the video's natural dimensions show */
+    flex: 1 1 320px;
+    max-width: 560px;
+    max-height: calc(100vh - 160px);
     background-color: #101424;
     border-radius: 20px;
     overflow: hidden;
@@ -169,6 +170,9 @@
     border: 2px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .remoteVideoContainer:hover {
@@ -176,10 +180,14 @@
     box-shadow: 0 12px 35px rgba(14, 113, 235, 0.15);
 }
 
+/* Video fills the container width; height follows natural aspect ratio */
 .remoteVideoContainer video {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;        /* portrait (9:16) phones display correctly */
+    max-height: calc(100vh - 160px);
+    object-fit: contain; /* never crop — show full frame regardless of orientation */
+    display: block;
+    border-radius: 18px;
 }
 
 /* Controls Bar */

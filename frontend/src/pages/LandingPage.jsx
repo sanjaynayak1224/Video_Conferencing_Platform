@@ -8,7 +8,7 @@ function LandingPage() {
     <div className='landingPageContainer'>
 
         <nav>
-            <div className='navHeader'>
+            <div className='navHeader' style={{ cursor: "pointer" }} onClick={() => router("/")}>
                 <h2>Apna Video Call</h2>
             </div>
             <div className='navlist'>

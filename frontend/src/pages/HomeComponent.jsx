@@ -32,7 +32,7 @@ function HomeComponent() {
     <div className="homePageContainer">  
         <div className="navBar">
 
-          <div style={{display: 'flex', alignItems: 'center'}}>
+          <div style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}} onClick={() => navigate("/")}>
             <h2>Apna Video Call</h2>
           </div>
 

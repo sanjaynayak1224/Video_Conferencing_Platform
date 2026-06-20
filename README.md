@@ -115,7 +115,7 @@ sequenceDiagram
 
 ## 🎨 Visual Details & Layout Optimization
 
-- **Self-view Mirroring & Positioning**: Built-in mirrored scaling (`transform: scaleX(-1)`) for local video inputs to look natural to users (remote views remain unmirrored). Positioned at the bottom-left corner of the screen across all screen sizes.
+- **Self-view Mirroring & Positioning**: Built-in mirrored scaling (`transform: scaleX(-1)`) for local video inputs to look natural (remote views remain unmirrored). Positioned in the bottom-left corner. Adapts to **portrait aspect ratio (`9:16`)** on mobile phones to display the feed vertically.
 - **Mobile Viewport Fix (`100dvh`)**: Avoids the classic mobile layout issue where address bars crop control buttons.
 - **Locked Page Viewport**: The overall page height is restricted (`height: 100dvh; overflow: hidden;`) to ensure the entire page never scrolls vertically. This keeps the bottom controls and local video PiP perfectly pinned at the bottom.
 - **Horizontal Video Carousel & Snap Alignment**:

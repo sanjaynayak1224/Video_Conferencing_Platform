@@ -321,7 +321,9 @@ export default function VideoMeetComponent() {
 
             // Request audio
             try {
-                const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const aStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                });
                 hasAudio = true;
                 if (combinedStream) {
                     aStream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
@@ -394,7 +396,10 @@ export default function VideoMeetComponent() {
             // try to get one now. Always ask for both video & audio so addTrack works correctly.
             if (!stream || stream.getTracks().filter(t => !t.ended).length === 0) {
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true, 
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                    });
                     localStreamRef.current = stream;
                     setVideoAvailable(stream.getVideoTracks().length > 0);
                     setAudioAvailable(stream.getAudioTracks().length > 0);
@@ -407,7 +412,9 @@ export default function VideoMeetComponent() {
                     } catch {
                         // Try audio-only
                         try {
-                            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                            });
                             localStreamRef.current = stream;
                             setAudioAvailable(true);
                         } catch (e2) {
@@ -455,7 +462,7 @@ export default function VideoMeetComponent() {
 
                 const camStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
-                    audio: true,
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                 });
                 localStreamRef.current = camStream;
 
@@ -491,6 +498,10 @@ export default function VideoMeetComponent() {
 
         const micTrack = localStreamRef.current?.getAudioTracks()[0];
         navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+            .catch(() => {
+                // Fallback to video-only if screen audio capture fails or is not supported (common on mobile/tablet)
+                return navigator.mediaDevices.getDisplayMedia({ video: true });
+            })
             .then(screenStream => {
                 screenActiveRef.current = true;
                 setScreenUI(true);

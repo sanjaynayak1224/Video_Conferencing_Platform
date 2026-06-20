@@ -388,10 +388,12 @@ button.endCallButton:hover,
 
     /* Self-view PiP */
     .meetUserVideo {
-        width: 110px;
+        width: 90px;
+        height: 140px; /* vertical layout */
+        aspect-ratio: 9 / 16;
         bottom: 84px;
         left: 10px;
-        border-radius: 10px;
+        border-radius: 12px;
     }
 
     /* Carousel height & card sizing on mobile portrait */

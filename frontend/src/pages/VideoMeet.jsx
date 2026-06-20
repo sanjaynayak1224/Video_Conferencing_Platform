@@ -87,6 +87,7 @@ export default function VideoMeetComponent() {
     const iceCandidateQRef = useRef({});     // { socketId -> RTCIceCandidateInit[] }
     const localStreamRef   = useRef(null);   // the user's own camera+mic stream
     const screenActiveRef  = useRef(false);  // true while screen-sharing
+    const showModalRef     = useRef(false);
 
     // ── React state ───────────────────────────────────────────────────────────
     const [_videoAvailable, setVideoAvailable]  = useState(false);
@@ -104,6 +105,11 @@ export default function VideoMeetComponent() {
     const [videos,          setVideos]          = useState([]);
 
     const routeTo = useNavigate();
+
+    // Sync showModal state with ref for stale-closure safety in socket listener
+    useEffect(() => {
+        showModalRef.current = showModal;
+    }, [showModal]);
 
     // ── 1. Acquire permissions on mount ───────────────────────────────────────
     useEffect(() => {
@@ -291,7 +297,9 @@ export default function VideoMeetComponent() {
 
         socket.on("chat-message", (data, sender, senderSocketId) => {
             setMessages(prev => [...prev, { sender, data }]);
-            if (senderSocketId !== socket.id) setNewMessages(n => n + 1);
+            if (senderSocketId !== socket.id && !showModalRef.current) {
+                setNewMessages(n => n + 1);
+            }
         });
 
         socket.on("user-left", id => {

@@ -20,7 +20,7 @@ A premium, high-fidelity, real-time video conferencing platform built on a moder
 *   **🔒 Permissions Guard Lobby**: Intelligently inspects microphone and camera hardware before entrance. Guides and re-prompts the user inline if permission is denied, avoiding messy page refreshes.
 *   **🖥️ Seamless Screen Sharing**: Instant, one-click screen sharing using WebRTC track replacement so other participants never lose connection.
 *   **📱 Orientation-Aware UI**: Responsive layouts tailored for mobile, tablet, and desktop screens. Dynamically detects orientation changes (landscape vs. portrait on phones) and repositions elements (self-view PiP, control bar) for the best viewing angle.
-*   **💬 In-Meet Chat Room**: Threaded messaging panel with dynamic notification badges so you don't miss text updates while talking.
+*   **💬 In-Meet Chat Room**: Threaded messaging panel with dynamic notification badges (which automatically mute and reset while the chat panel is actively open) so you don't miss updates when focused elsewhere.
 *   **✨ Space-Dark Glassmorphic Theme**: Designed with custom HSL-tailored gradients, subtle CSS micro-animations, hover scaling, dynamic viewports (`100dvh`), and proper safe-area padding for iOS notches.
 
 ---

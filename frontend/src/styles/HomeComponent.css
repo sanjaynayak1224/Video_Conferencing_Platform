@@ -1,8 +1,10 @@
 /* HomeComponent Styles */
 .homePageContainer {
     background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
-    min-height: 100dvh;
+    height: 100dvh;
     display: flex;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-direction: column;
     color: #ffffff;
     font-family: 'Outfit', 'Inter', sans-serif;

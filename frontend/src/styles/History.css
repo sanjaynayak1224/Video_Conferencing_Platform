@@ -1,7 +1,9 @@
 /* History Page Styles */
 .historyContainer {
     width: 100%;
-    min-height: 100dvh;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 3rem 4rem;
     font-family: 'Outfit', 'Inter', sans-serif;
     background: linear-gradient(135deg, #070913 0%, #0d1127 100%);

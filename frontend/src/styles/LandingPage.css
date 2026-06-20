@@ -1,11 +1,12 @@
 /* Landing Page Styles */
 .landingPageContainer {
     width: 100%;
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     background: linear-gradient(135deg, rgba(7, 9, 19, 0.85) 0%, rgba(13, 17, 39, 0.92) 100%), url("/background.jpg") no-repeat center center fixed;
     background-size: cover;
     color: white;
+    overflow-y: auto;
     overflow-x: hidden;
     font-family: 'Outfit', 'Inter', sans-serif;
     display: flex;

@@ -2,7 +2,7 @@
 import { useContext, useState } from 'react'
 import WithAuth from '../utils/WithAuth.jsx'
 import { useNavigate } from 'react-router-dom'
-import "./HomeComponent.css"
+import "../styles/HomeComponent.css"
 import IconButton from '@mui/material/IconButton';
 import RestoreIcon from '@mui/icons-material/Restore';
 import Button from '@mui/material/Button';

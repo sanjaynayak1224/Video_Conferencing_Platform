@@ -570,3 +570,123 @@ button.endCallButton:hover,
     .meetUserVideo { width: 90px; }
     .lobbyContainer h2 { font-size: 1.4rem; }
 }
+
+/* ── Screen Sharing Error Dialog ────────────────────────────────────────── */
+.shareErrorOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(6, 8, 16, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1.5rem;
+    animation: fadeInOverlay 0.25s ease;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.shareErrorCard {
+    background: rgba(13, 17, 39, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    animation: scaleInCard 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleInCard {
+    from { transform: scale(0.9) translateY(10px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.shareErrorCard h3 {
+    margin-top: 0;
+    margin-bottom: 1.2rem;
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff5252, #ff7b7b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.shareErrorCard p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+}
+
+.shareErrorCard p.recommendText {
+    color: #0dffe4;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    background: rgba(13, 255, 228, 0.05);
+    padding: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(13, 255, 228, 0.12);
+}
+
+.shareErrorActions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.shareErrorActions button {
+    flex: 1;
+    height: 48px;
+    border-radius: 12px !important;
+    text-transform: none !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
+
+.shareErrorActions button.MuiButton-contained {
+    background: linear-gradient(135deg, #0E71EB, #00d2ff) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(14, 113, 235, 0.3) !important;
+}
+
+.shareErrorActions button.MuiButton-contained:hover {
+    box-shadow: 0 6px 20px rgba(14, 113, 235, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+.shareErrorActions button.closeBtn {
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.shareErrorActions button.closeBtn:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+    .shareErrorCard {
+        padding: 1.8rem 1.2rem;
+    }
+    .shareErrorCard h3 {
+        font-size: 1.35rem;
+    }
+    .shareErrorActions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+}

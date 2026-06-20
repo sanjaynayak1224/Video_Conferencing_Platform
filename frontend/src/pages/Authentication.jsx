@@ -10,7 +10,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import Snackbar from '@mui/material/Snackbar';
-import "./Authentication.css";
+import "../styles/Authentication.css";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 

@@ -1,7 +1,7 @@
 /* HomeComponent Styles */
 .homePageContainer {
     background: linear-gradient(135deg, #070913 0%, #0d1127 100%);
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     color: #ffffff;
@@ -93,7 +93,7 @@
     display: flex;
     padding-inline: 6rem;
     flex-grow: 1;
-    height: calc(100vh - 73px);
+    height: calc(100dvh - 73px);
     gap: 6vw;
     justify-content: center;
     align-items: center;
@@ -240,7 +240,7 @@
         padding-inline: 2rem;
         padding-block: 4rem;
         height: auto;
-        min-height: calc(100vh - 120px);
+        min-height: calc(100dvh - 120px);
         gap: 3rem;
     }
 

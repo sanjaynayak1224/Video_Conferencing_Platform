@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import "./VideoMeet.css";
+import "../styles/VideoMeet.css";
 import TextField   from '@mui/material/TextField';
 import IconButton  from '@mui/material/IconButton';
 import VideocamIcon        from '@mui/icons-material/Videocam';
@@ -108,6 +108,7 @@ export default function VideoMeetComponent() {
     const [username,        setUsername]        = useState(localStorage.getItem("apna_username") || "");
     const [videos,          setVideos]          = useState([]);
     const [currentPage,     setCurrentPage]     = useState(0);
+    const [showScreenShareError, setShowScreenShareError] = useState(false);
 
     const routeTo = useNavigate();
 
@@ -501,7 +502,7 @@ export default function VideoMeetComponent() {
 
     const startScreenShare = useCallback(() => {
         if (!navigator.mediaDevices?.getDisplayMedia) {
-            alert("Screen sharing is not supported on this browser/device.");
+            setShowScreenShareError(true);
             return;
         }
 
@@ -549,7 +550,7 @@ export default function VideoMeetComponent() {
                 setScreenUI(false);
                 screenActiveRef.current = false;
             });
-    }, [stopScreenShare]);
+    }, [stopScreenShare, setShowScreenShareError]);
 
     const handleScreen = useCallback(() => {
         if (screenActiveRef.current) {
@@ -578,6 +579,39 @@ export default function VideoMeetComponent() {
         sessionStorage.removeItem(`apna_active_${url}`);
         routeTo("/home");
     };
+
+    // ── 9. Handle Bluetooth / audio output device changes mid-call ──────────────
+    useEffect(() => {
+        const handleDeviceChange = async () => {
+            console.log("[Audio] Device change detected (e.g., Bluetooth connected/disconnected)");
+            try {
+                if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const defaultOutput = devices.find(d => d.kind === 'audiooutput' && d.deviceId === 'default');
+                    const targetSinkId = defaultOutput ? defaultOutput.deviceId : 'default';
+
+                    const videoElements = document.querySelectorAll('video');
+                    for (const video of videoElements) {
+                        if (typeof video.setSinkId === 'function') {
+                            await video.setSinkId(targetSinkId).catch(err => {
+                                console.warn("[Audio] Failed to setSinkId on video element:", err);
+                            });
+                        }
+                        if (video.srcObject) {
+                            video.play().catch(() => {});
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("[Audio] handleDeviceChange error:", err);
+            }
+        };
+
+        navigator.mediaDevices?.addEventListener('devicechange', handleDeviceChange);
+        return () => {
+            navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
+        };
+    }, []);
 
     // ── Render ────────────────────────────────────────────────────────────────
     const maxPage = Math.max(0, Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1);
@@ -729,6 +763,39 @@ export default function VideoMeetComponent() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Screen Share Error Modal */}
+                    {showScreenShareError && (
+                        <div className="shareErrorOverlay">
+                            <div className="shareErrorCard">
+                                <h3>Screen Sharing Unavailable</h3>
+                                <p>
+                                    Mobile operating systems (iOS, iPadOS, and Android) do not support screen sharing in web browsers due to platform security limitations.
+                                </p>
+                                <p className="recommendText">
+                                    To share your screen, please join this meeting on a laptop or desktop computer.
+                                </p>
+                                <div className="shareErrorActions">
+                                    <Button 
+                                        variant="contained" 
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(window.location.href);
+                                            alert("Meeting link copied to clipboard!");
+                                        }}
+                                    >
+                                        Copy Link
+                                    </Button>
+                                    <Button 
+                                        className="closeBtn"
+                                        variant="outlined" 
+                                        onClick={() => setShowScreenShareError(false)}
+                                    >
+                                        Close
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             )}

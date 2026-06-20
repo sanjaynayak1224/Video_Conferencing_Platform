@@ -114,10 +114,12 @@ sequenceDiagram
 
 ## 🎨 Visual Details & Layout Optimization
 
-- **Self-view Mirroring**: Built-in mirrored scaling (`transform: scaleX(-1)`) for local video inputs, making it look natural to users (remote views remain correctly unmirrored).
-- **Mobile Viewport Fix (`100dvh`)**: Avoids the classic mobile layout issues where address bars crop control buttons.
-- **Dynamic CSS Video Grid**:
+- **Self-view Mirroring & Positioning**: Built-in mirrored scaling (`transform: scaleX(-1)`) for local video inputs to look natural to users (remote views remain unmirrored). Positioned at the bottom-left corner of the screen across all screen sizes.
+- **Mobile Viewport Fix (`100dvh`)**: Avoids the classic mobile layout issue where address bars crop control buttons.
+- **Strict, Non-Overflowing CSS Video Grid**: 
+  - Uses dynamic row/column calculations instead of fixed aspect ratios to prevent page overflow on landscape or constrained viewports.
   - **1 User**: Full screen.
-  - **2 Users**: 50/50 split layout.
+  - **2 Users**: 50/50 split layout (stacked on mobile portrait, side-by-side on desktop/landscape).
   - **3-4 Users**: Balanced 2x2 grid.
-  - **5+ Users**: Scrollable auto-rows view.
+  - **5-6 Users**: Balanced 3x2 grid (2x3 on mobile portrait/tablet).
+  - **7+ Users**: Scrollable auto-rows layout utilizing safe `minmax()` boundaries (prevents squishing cells to 0px).

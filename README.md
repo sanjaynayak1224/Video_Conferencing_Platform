@@ -17,7 +17,7 @@ A premium, high-fidelity, real-time video conferencing platform built on a moder
 ## 🌟 Core Features
 
 *   **⚡ Ultra-Low Latency Streaming**: Native peer-to-peer audio & video transmission powered by WebRTC (`RTCPeerConnection`) with Socket.io signaling.
-*   **🔄 Auto-Rejoin on Reload**: Routing built on `HashRouter` prevents "Page not found" 404 errors on dynamic reloads. Automatically caches user details and reconnects to the active room immediately.
+*   **🔄 Auto-Rejoin on Reload**: Routing built on `HashRouter` prevents "Page not found" 404 errors on dynamic reloads. If a user reloads the page while actively in an ongoing call, they are automatically reconnected to the room immediately, bypassing the lobby. When entering a room fresh, they are guided through the interactive Lobby page first to prevent unintended auto-joins.
 *   **🔒 Permissions Guard Lobby**: Intelligently inspects microphone and camera hardware before entrance. Guides and re-prompts the user inline if permission is denied, avoiding messy page refreshes.
 *   **🖥️ Narrated Screen Sharing**: One-click screen sharing with local microphone audio preserved (user voice remains audible to others). Sharing controls are always visible on all devices.
 *   **📱 Horizontal Video Carousel**: Implemented a horizontal scrolling flex carousel with snapping for meetings with 2+ participants, ensuring the main layout remains locked and controls never scroll out of view.

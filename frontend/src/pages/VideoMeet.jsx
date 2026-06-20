@@ -345,9 +345,11 @@ export default function VideoMeetComponent() {
                 }
             }
 
-            // Auto-rejoin if username is already saved in localStorage and we are on a call route
+            // Auto-rejoin if username is already saved in localStorage, we are on a call route,
+            // and the session flag indicates they were already in the meeting in this window session.
             const savedUsername = localStorage.getItem("apna_username");
-            if (savedUsername && savedUsername.trim() && url) {
+            const wasActive = sessionStorage.getItem(`apna_active_${url}`) === "true";
+            if (savedUsername && savedUsername.trim() && url && wasActive) {
                 setUsername(savedUsername.trim());
                 // Start with tracks disabled initially per requirement
                 if (combinedStream) {
@@ -387,6 +389,7 @@ export default function VideoMeetComponent() {
         }
 
         localStorage.setItem("apna_username", username.trim());
+        sessionStorage.setItem(`apna_active_${url}`, "true");
 
         connectingRef.current = true;
         try {
@@ -566,6 +569,7 @@ export default function VideoMeetComponent() {
         iceCandidateQRef.current = {};
         socketRef.current?.disconnect();
         socketRef.current = null;
+        sessionStorage.removeItem(`apna_active_${url}`);
         routeTo("/home");
     };
 

@@ -108,7 +108,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .historyHeader {
         margin-bottom: 2rem;
         gap: 1.2rem;

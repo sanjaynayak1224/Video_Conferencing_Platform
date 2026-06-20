@@ -229,7 +229,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .homePageContainer {
         overflow-y: auto;
     }

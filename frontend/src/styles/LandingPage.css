@@ -222,7 +222,11 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
+    .landingPageContainer {
+        overflow-y: auto;
+    }
+
     .landingPageContainer nav {
         flex-direction: column;
         gap: 1.2rem;
@@ -276,8 +280,4 @@
         height: 28vh;
     }
 }
-@media (max-width: 600px) {
-    .landingPageContainer {
-        overflow-y: auto;
-    }
-}
+

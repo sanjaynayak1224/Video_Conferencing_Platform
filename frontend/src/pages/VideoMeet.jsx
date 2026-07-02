@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useWebRTC } from '../hooks/useWebRTC';
@@ -79,7 +78,9 @@ export default function VideoMeetComponent() {
         toggleScreenShare,
         sendMessage: rtcSendMessage,
         showScreenShareError,
-        setShowScreenShareError
+        setShowScreenShareError,
+        remoteMediaStates,
+        activeSpeaker
     } = useWebRTC(url, username, handleIncomingChatMessage);
 
     // Lock viewport scrolling when actively inside a meeting call
@@ -178,13 +179,29 @@ export default function VideoMeetComponent() {
         };
     }, []);
 
-    // Pagination
-    const maxPage = Math.max(0, Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1);
+    // Helper to get initials from username
+    const getInitials = (name) => {
+        if (!name) return "?";
+        const parts = name.trim().split(" ");
+        if (parts.length >= 2) {
+            return (parts[0][0] + (parts[1]?.[0] || "")).toUpperCase();
+        }
+        return parts[0].substring(0, 2).toUpperCase();
+    };
+
+    // Pagination and Active Speaker sorting
+    const sortedVideos = [...videos].sort((a, b) => {
+        if (a.socketId === activeSpeaker) return -1;
+        if (b.socketId === activeSpeaker) return 1;
+        return 0;
+    });
+
+    const maxPage = Math.max(0, Math.ceil(sortedVideos.length / VIDEOS_PER_PAGE) - 1);
     if (currentPage > maxPage) {
         setCurrentPage(maxPage);
     }
 
-    const visibleVideos = videos.slice(currentPage * VIDEOS_PER_PAGE, (currentPage + 1) * VIDEOS_PER_PAGE);
+    const visibleVideos = sortedVideos.slice(currentPage * VIDEOS_PER_PAGE, (currentPage + 1) * VIDEOS_PER_PAGE);
 
     return (
         <div className="meetMainPage">
@@ -202,6 +219,16 @@ export default function VideoMeetComponent() {
                         onKeyDown={e => { if (e.key === 'Enter') connect(); }}
                     />
                     <Button variant="contained" onClick={connect}>Connect</Button>
+                    <div className="lobbyDeviceStatus">
+                        <div className={`statusIndicator ${videoAvailable ? 'active' : 'denied'}`}>
+                            <span className="dot"></span>
+                            <span>Camera: {videoAvailable ? "Ready" : "Blocked"}</span>
+                        </div>
+                        <div className={`statusIndicator ${audioAvailable ? 'active' : 'denied'}`}>
+                            <span className="dot"></span>
+                            <span>Microphone: {audioAvailable ? "Ready" : "Blocked"}</span>
+                        </div>
+                    </div>
                     <div className="lobbyVideoContainer">
                         <video
                             playsInline autoPlay muted
@@ -308,7 +335,15 @@ export default function VideoMeetComponent() {
                                 }
                             }}
                         />
-                        <div className="videoLabel localLabel">{username} (You)</div>
+                        <div className="videoLabel localLabel">
+                            <span>{username} (You)</span>
+                            {!audio && <MicOffIcon className="micStatusIcon" />}
+                        </div>
+                        {!video && (
+                            <div className="avatarPlaceholder localAvatar">
+                                <span>{getInitials(username)}</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Remote participant videos */}
@@ -316,9 +351,12 @@ export default function VideoMeetComponent() {
                         {visibleVideos.map(v => {
                             const isDisconnected = v.connectionState === 'disconnected' || v.connectionState === 'failed';
                             const isConnecting = v.connectionState === 'checking' || v.connectionState === 'connecting';
+                            const remoteVideoOff = remoteMediaStates[v.socketId]?.video === false;
+                            const remoteAudioMuted = remoteMediaStates[v.socketId]?.audio === false;
+                            const isSpeaking = activeSpeaker === v.socketId;
 
                             return (
-                                <div key={v.socketId} className="remoteVideoContainer">
+                                <div key={v.socketId} className={`remoteVideoContainer ${isSpeaking ? 'activeSpeaker' : ''}`}>
                                     <video
                                         playsInline autoPlay muted
                                         data-socket={v.socketId}
@@ -336,7 +374,17 @@ export default function VideoMeetComponent() {
                                             });
                                         }}
                                     />
-                                    <div className="videoLabel">{v.username || "Guest"}</div>
+                                    <div className="videoLabel">
+                                        <span>{v.username || "Guest"}</span>
+                                        {remoteAudioMuted && <MicOffIcon className="micStatusIcon" />}
+                                    </div>
+
+                                    {/* Video Mute Placeholder Card */}
+                                    {remoteVideoOff && (
+                                        <div className="avatarPlaceholder">
+                                            <span>{getInitials(v.username)}</span>
+                                        </div>
+                                    )}
 
                                     {/* Connection status feedback overlays */}
                                     {isDisconnected && (

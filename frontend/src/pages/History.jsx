@@ -38,6 +38,24 @@ export default function History() {
         return `${day}/${month}/${year}`
     }
 
+    const formatTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
+
+    const formatDuration = (ms) => {
+        if (!ms && ms !== 0) return "N/A";
+        const totalSecs = Math.floor(ms / 1000);
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
+        
+        if (mins === 0) {
+            return `${secs} sec${secs !== 1 ? 's' : ''}`;
+        }
+        return `${mins} min${mins !== 1 ? 's' : ''} ${secs} sec${secs !== 1 ? 's' : ''}`;
+    };
+
   return (
     <div className="historyContainer">
       <div className="historyHeader">
@@ -49,19 +67,29 @@ export default function History() {
       
       <div className="historyCardsGrid">
         {meetings.length !== 0 ? (
-          meetings.map((meeting, i) => {
+          [...meetings].reverse().map((meeting, i) => {
             return (
               <Card variant="outlined" key={i} className="historyCard">
                 <CardContent>
                   <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }} className="cardCode">
                     Code: {meeting.meetingCode}
                   </Typography>
-                  <Typography sx={{ color: 'text.secondary', mb: 1.5 }} className="cardDate">
+                  <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardDate">
                     Date: {formatDate(meeting.date)}
                   </Typography>
-                  <Typography sx={{ color: 'text.secondary', mb: 1.5 }} className="cardUserId">
+                  <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardUserId">
                     User ID: {meeting.user_id}
                   </Typography>
+                  {meeting.joinedAt && (
+                    <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardTime">
+                      Time: {formatTime(meeting.joinedAt)} - {formatTime(meeting.leftAt)}
+                    </Typography>
+                  )}
+                  {meeting.duration !== undefined && (
+                    <Typography sx={{ color: 'text.secondary', mb: 0 }} className="cardDuration">
+                      Duration: {formatDuration(meeting.duration)}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             );

@@ -24,6 +24,8 @@ export function useWebRTC(url, username, onChatMessage) {
     const connectingRef = useRef(false);
     const audioContextsRef = useRef([]); // Track AudioContexts to close on cleanup
     const clientsRef = useRef([]); // Store client metadata list (socketId -> username)
+    const audioAnalyzersRef = useRef({}); // Store remote peer audio analysers
+    const speakerTimeoutRef = useRef({}); // Store active speaker delay timeout identifiers
 
     const [videos, setVideos] = useState([]);
     const [video, setVideo] = useState(false);
@@ -34,6 +36,8 @@ export function useWebRTC(url, username, onChatMessage) {
     const [screenAvailable] = useState(true);
     const [showScreenShareError, setShowScreenShareError] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
+    const [remoteMediaStates, setRemoteMediaStates] = useState({});
+    const [activeSpeaker, setActiveSpeaker] = useState(null);
 
     /** Returns a silent (muted) audio MediaStreamTrack and tracks its AudioContext for cleanup */
     const makeSilentTrack = useCallback(() => {
@@ -127,6 +131,83 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, []);
 
+    /** Clear active speaker status after silence delay */
+    const clearActiveSpeakerTimeout = useCallback((remoteId) => {
+        if (speakerTimeoutRef.current[remoteId]) {
+            clearTimeout(speakerTimeoutRef.current[remoteId]);
+        }
+        speakerTimeoutRef.current[remoteId] = setTimeout(() => {
+            setActiveSpeaker(current => current === remoteId ? null : current);
+            delete speakerTimeoutRef.current[remoteId];
+        }, 2500); // 2.5 seconds of silence before highlight disappears
+    }, []);
+
+    const stopAudioAnalyzing = useCallback((remoteId) => {
+        const analyzer = audioAnalyzersRef.current[remoteId];
+        if (analyzer) {
+            clearInterval(analyzer.intervalId);
+            try {
+                if (analyzer.actx.state !== "closed") {
+                    analyzer.actx.close().catch(() => {});
+                }
+            } catch {
+                // Silently ignore close errors
+            }
+            delete audioAnalyzersRef.current[remoteId];
+        }
+        if (speakerTimeoutRef.current[remoteId]) {
+            clearTimeout(speakerTimeoutRef.current[remoteId]);
+            delete speakerTimeoutRef.current[remoteId];
+        }
+        setActiveSpeaker(current => current === remoteId ? null : current);
+    }, []);
+
+    const startAudioAnalyzing = useCallback((remoteId, stream) => {
+        // Prevent duplicate analyzers for same peer
+        if (audioAnalyzersRef.current[remoteId]) return;
+
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length === 0) return;
+
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            const actx = new AudioContextClass();
+            audioContextsRef.current.push(actx);
+            
+            const src = actx.createMediaStreamSource(stream);
+            const analyser = actx.createAnalyser();
+            analyser.fftSize = 256; // Smaller fftSize is faster for volume level polling
+            src.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const intervalId = setInterval(() => {
+                if (actx.state === "closed") {
+                    clearInterval(intervalId);
+                    return;
+                }
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const averageVolume = sum / bufferLength;
+
+                // Threshold check: 35 is standard conversational activity level
+                if (averageVolume > 35) {
+                    setActiveSpeaker(remoteId);
+                    clearActiveSpeakerTimeout(remoteId);
+                }
+            }, 200);
+
+            audioAnalyzersRef.current[remoteId] = { actx, intervalId };
+        } catch (e) {
+            console.warn("Failed to initialize audio analyzer:", e);
+        }
+    }, [clearActiveSpeakerTimeout]);
+
     /** Create an RTCPeerConnection for a remote peer */
     const createPeerConnection = useCallback((remoteId) => {
         const pc = new RTCPeerConnection(peerConfigConnections);
@@ -150,6 +231,10 @@ export function useWebRTC(url, username, onChatMessage) {
 
         pc.ontrack = ({ streams, track }) => {
             const remoteStream = (streams && streams[0]) || new MediaStream([track]);
+            
+            // Start volume monitoring for speaker identification
+            startAudioAnalyzing(remoteId, remoteStream);
+
             setVideos(prev => {
                 const exists = prev.find(v => v.socketId === remoteId);
                 const clientMeta = clientsRef.current.find(c => c.socketId === remoteId);
@@ -167,11 +252,13 @@ export function useWebRTC(url, username, onChatMessage) {
         localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
         connectionsRef.current[remoteId] = pc;
         return pc;
-    }, [makeBlackSilenceStream]);
+    }, [makeBlackSilenceStream, startAudioAnalyzing]);
 
     /** Establish Socket.IO connection and wire signaling events */
     const connectToSocketServer = useCallback(() => {
+        const token = localStorage.getItem("token");
         const socket = io(server_url, {
+            auth: { token },
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 15,
@@ -192,15 +279,35 @@ export function useWebRTC(url, username, onChatMessage) {
             });
         }
 
+        socket.on("media-toggle", (peerId, state) => {
+            setRemoteMediaStates(prev => ({
+                ...prev,
+                [peerId]: state
+            }));
+        });
+
         socket.on("user-left", id => {
             connectionsRef.current[id]?.close();
             delete connectionsRef.current[id];
             delete iceCandidateQRef.current[id];
             setVideos(prev => prev.filter(v => v.socketId !== id));
+            stopAudioAnalyzing(id);
+            setRemoteMediaStates(prev => {
+                const copy = { ...prev };
+                delete copy[id];
+                return copy;
+            });
         });
 
         socket.on("user-joined", (id, clientsList) => {
             clientsRef.current = clientsList;
+
+            // Map and store initial media states for all peers
+            const statesMap = {};
+            clientsList.forEach(client => {
+                statesMap[client.socketId] = client.mediaState || { video: false, audio: false };
+            });
+            setRemoteMediaStates(prev => ({ ...prev, ...statesMap }));
 
             clientsList.forEach(client => {
                 const remoteId = client.socketId;
@@ -223,7 +330,7 @@ export function useWebRTC(url, username, onChatMessage) {
                 });
             }
         });
-    }, [url, username, gotMessageFromServer, createPeerConnection, onChatMessage]);
+    }, [url, username, gotMessageFromServer, createPeerConnection, onChatMessage, stopAudioAnalyzing]);
 
     /** Toggle local video track state */
     const toggleVideo = useCallback(() => {
@@ -238,9 +345,10 @@ export function useWebRTC(url, username, onChatMessage) {
                     });
                 }
             }
+            socketRef.current?.emit("media-toggle", { video: nextVal, audio });
             return nextVal;
         });
-    }, []);
+    }, [audio]);
 
     /** Toggle local audio track state */
     const toggleAudio = useCallback(() => {
@@ -250,9 +358,10 @@ export function useWebRTC(url, username, onChatMessage) {
             if (stream) {
                 stream.getAudioTracks().forEach(t => { t.enabled = nextVal; });
             }
+            socketRef.current?.emit("media-toggle", { video, audio: nextVal });
             return nextVal;
         });
-    }, []);
+    }, [video]);
 
     /** Stop screen sharing and restore camera input */
     const stopScreenShare = useCallback(async () => {
@@ -502,6 +611,8 @@ export function useWebRTC(url, username, onChatMessage) {
         showScreenShareError,
         setShowScreenShareError,
         isConnecting,
-        socketRef
+        socketRef,
+        remoteMediaStates,
+        activeSpeaker
     };
 }

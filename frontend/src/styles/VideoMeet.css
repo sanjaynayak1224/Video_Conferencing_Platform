@@ -702,7 +702,7 @@ button.endCallButton:hover,
     position: absolute;
     bottom: 12px;
     left: 12px;
-    background: rgba(13, 17, 39, 0.7);
+    background: rgba(13, 17, 39, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -717,6 +717,21 @@ button.endCallButton:hover,
     transition: opacity 0.3s ease;
     font-family: 'Outfit', sans-serif;
     letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.videoLabel .micStatusIcon {
+    color: #ff5252;
+    font-size: 1.1rem;
+    animation: shakeIcon 0.4s ease;
+}
+
+@keyframes shakeIcon {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .meetUserVideoWrapper .localLabel {
@@ -724,8 +739,8 @@ button.endCallButton:hover,
     left: 8px;
     font-size: 0.72rem;
     padding: 4px 10px;
-    background: rgba(14, 113, 235, 0.45);
-    border-color: rgba(0, 210, 255, 0.25);
+    background: rgba(14, 113, 235, 0.5);
+    border-color: rgba(0, 210, 255, 0.3);
 }
 
 /* ── WebRTC ICE Connection Status Overlays ────────────────────────────────── */
@@ -811,4 +826,118 @@ button.endCallButton:hover,
         box-shadow: 0 0 0 0 rgba(14, 113, 235, 0);
     }
 }
+
+/* ── Video Mute Avatar Placeholders ────────────────────────────────────────── */
+.avatarPlaceholder {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #1b203a 0%, #0a0c16 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.avatarPlaceholder span {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #0E71EB, #00d2ff);
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(14, 113, 235, 0.4);
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    animation: avatarPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes avatarPulse {
+    0% { transform: scale(1); box-shadow: 0 10px 25px rgba(14, 113, 235, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 10px 35px rgba(0, 210, 255, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 10px 25px rgba(14, 113, 235, 0.4); }
+}
+
+.meetUserVideoWrapper .localAvatar {
+    border-radius: 12px;
+}
+
+.meetUserVideoWrapper .localAvatar span {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+    border-width: 2px;
+}
+
+/* ── Active Speaker Card Highlighting ───────────────────────────────────────── */
+.remoteVideoContainer.activeSpeaker {
+    border-color: #00d2ff !important;
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.45) !important;
+    transform: scale(1.01);
+    animation: activeSpeakerGlow 2s infinite ease-in-out;
+}
+
+@keyframes activeSpeakerGlow {
+    0% { box-shadow: 0 0 25px rgba(0, 210, 255, 0.45); }
+    50% { box-shadow: 0 0 35px rgba(14, 113, 235, 0.7); }
+    100% { box-shadow: 0 0 25px rgba(0, 210, 255, 0.45); }
+}
+
+/* ── Lobby Pre-Meeting Device Indicators ──────────────────────────────────── */
+.lobbyDeviceStatus {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.8rem 1.5rem;
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.statusIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.statusIndicator .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.statusIndicator.active {
+    color: #4caf50;
+}
+
+.statusIndicator.active .dot {
+    background-color: #4caf50;
+    box-shadow: 0 0 8px #4caf50;
+    animation: dotPulse 1.5s infinite;
+}
+
+.statusIndicator.denied {
+    color: #ff5252;
+}
+
+.statusIndicator.denied .dot {
+    background-color: #ff5252;
+    box-shadow: 0 0 8px #ff5252;
+}
+
+@keyframes dotPulse {
+    0% { transform: scale(0.9); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.8; }
+}
+
 

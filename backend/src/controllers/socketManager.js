@@ -1,4 +1,6 @@
 import { Server } from "socket.io";
+import { Meeting } from "../models/meeting.model.js";
+import jwt from "jsonwebtoken";
 
 let messages = {};
 let timeOnline = {};
@@ -20,17 +22,33 @@ export const connectToSocket = (server) => {
             socket.join(path);
             socket.room = path;
             socket.username = username || "Guest";
+            socket.mediaState = { video: false, audio: false }; // Initial call join states default to off
             timeOnline[socket.id] = new Date();
+
+            // Handshake JWT Auth to map database session logs
+            const token = socket.handshake.auth?.token;
+            if (token) {
+                try {
+                    const secret = process.env.JWT_SECRET || "apna_video_call_default_secret_key_2026";
+                    const decoded = jwt.verify(token, secret);
+                    socket.user_id = decoded.username;
+                    socket.joinedAt = new Date();
+                    console.log(`[Socket Auth] Mapping authenticated user: ${socket.user_id}`);
+                } catch (e) {
+                    console.warn("[Socket Auth] Token verification failed on room join:", e.message);
+                }
+            }
 
             // Fetch list of client IDs in this native room
             const clients = Array.from(io.sockets.adapter.rooms.get(path) || []);
 
-            // Map IDs to username metadata
+            // Map IDs to username metadata and media states
             const clientList = clients.map(clientId => {
                 const clientSocket = io.sockets.sockets.get(clientId);
                 return {
                     socketId: clientId,
-                    username: clientSocket?.username || "Guest"
+                    username: clientSocket?.username || "Guest",
+                    mediaState: clientSocket?.mediaState || { video: false, audio: false }
                 };
             });
 
@@ -46,6 +64,13 @@ export const connectToSocket = (server) => {
                     io.to(socket.id).emit("chat-message", msg.data, msg.sender, msg.socketId);
                 });
             }
+        });
+
+        socket.on("media-toggle", (state) => {
+            const room = socket.room;
+            if (!room) return;
+            socket.mediaState = state;
+            socket.to(room).emit("media-toggle", socket.id, state);
         });
 
         socket.on("signal", (toId, message) => {
@@ -80,6 +105,24 @@ export const connectToSocket = (server) => {
 
             // Notify everyone in that room that the user has left
             socket.to(roomKey).emit("user-left", socket.id);
+
+            // Save meeting history entry to database on socket disconnection
+            if (socket.user_id && socket.joinedAt) {
+                const leftAt = new Date();
+                const duration = leftAt - socket.joinedAt;
+                
+                const newMeeting = new Meeting({
+                    user_id: socket.user_id,
+                    meetingCode: roomKey.replace(/^\//, ""), // Strip leading slash
+                    date: socket.joinedAt,
+                    joinedAt: socket.joinedAt,
+                    leftAt: leftAt,
+                    duration: duration
+                });
+                newMeeting.save()
+                    .then(() => console.log(`[Socket DB] Successfully saved meeting log for ${socket.user_id}`))
+                    .catch(e => console.error("[Socket DB] Error saving meeting log:", e));
+            }
 
             // Check if the native room is now empty
             const roomExists = io.sockets.adapter.rooms.has(roomKey);

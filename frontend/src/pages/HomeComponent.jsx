@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import WithAuth from '../utils/WithAuth.jsx'
 import { useNavigate } from 'react-router-dom'
 import "../styles/HomeComponent.css"
@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import RestoreIcon from '@mui/icons-material/Restore';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { AuthContext } from '../context/AuthContext.jsx';
+
 
 function HomeComponent() {
 
@@ -16,14 +16,13 @@ function HomeComponent() {
 
   const [meetingCode, setMeetingCode] = useState('')
   
-  const {addToUserHistory}=useContext(AuthContext)
+  
 
   let handleJoinVideoCall = () => {
       if (!meetingCode.trim()) {
           alert("Please enter a meeting code.");
           return;
       }
-      addToUserHistory(meetingCode);
       navigate(`/${meetingCode}`);
   }
 

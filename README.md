@@ -16,6 +16,8 @@ An enterprise-grade, real-time video conferencing application designed to demons
 
 ## 🎨 Core Architectural Enhancements
 
+*   **🗣️ Active Speaker highlighting (Web Audio API)**: Configured custom audio analyser frequency nodes checking remote streams. Highlights speakers with glowing dynamic borders and sorts the layout grid to float the active speaker to the primary grid card.
+*   **⏱️ Automated Session Duration Logs**: Combines WebSocket verification with MongoDB triggers. Automatically tracks connection time (from socket handshake to disconnect) and maps periods (e.g. 10:15 AM - 10:45 AM) alongside precise duration counts on History logs.
 *   **🔒 Stateless JWT Authentication**: Protected backend routes verified statelessly via a centralized Express authorization middleware, replacing resource-heavy database lookups.
 *   **🔀 Decoupled WebRTC Hooks (`useWebRTC`)**: Business logic, peer connections, STUN/TURN rules, and socket events are isolated into a custom React hook. The UI remains lightweight, testable, and compliant with the Single Responsibility Principle.
 *   **🌐 Native Socket.io Room Routing**: Manual, scale-limiting arrays were refactored to Socket.io's native room managers (`socket.join`), allowing immediate horizontal scaling and Redis adapter clustering.

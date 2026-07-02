@@ -93,6 +93,12 @@
     margin-bottom: 0.6rem !important;
 }
 
+.cardTime, .cardDuration {
+    font-size: 0.95rem !important;
+    color: #ffffff !important;
+    margin-bottom: 0.6rem !important;
+}
+
 .noMeetings {
     grid-column: 1 / -1;
     text-align: center;

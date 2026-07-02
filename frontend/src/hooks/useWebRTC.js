@@ -38,6 +38,7 @@ export function useWebRTC(url, username, onChatMessage) {
     const [isConnecting, setIsConnecting] = useState(false);
     const [remoteMediaStates, setRemoteMediaStates] = useState({});
     const [activeSpeaker, setActiveSpeaker] = useState(null);
+    const [localStream, setLocalStream] = useState(null);
 
     /** Returns a silent (muted) audio MediaStreamTrack and tracks its AudioContext for cleanup */
     const makeSilentTrack = useCallback(() => {
@@ -376,6 +377,7 @@ export function useWebRTC(url, username, onChatMessage) {
                 audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
             });
             localStreamRef.current = camStream;
+            setLocalStream(camStream);
 
             camStream.getVideoTracks().forEach(t => { t.enabled = true; });
             camStream.getAudioTracks().forEach(t => { t.enabled = true; });
@@ -424,6 +426,7 @@ export function useWebRTC(url, username, onChatMessage) {
 
                 const combinedStream = new MediaStream(tracks);
                 localStreamRef.current = combinedStream;
+                setLocalStream(combinedStream);
                 if (localVideoRef.current) localVideoRef.current.srcObject = combinedStream;
 
                 Object.values(connectionsRef.current).forEach(pc => {
@@ -476,6 +479,7 @@ export function useWebRTC(url, username, onChatMessage) {
                         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
                     });
                     localStreamRef.current = stream;
+                    setLocalStream(stream);
                     setVideoAvailable(stream.getVideoTracks().length > 0);
                     setAudioAvailable(stream.getAudioTracks().length > 0);
                 } catch (e1) {
@@ -483,6 +487,7 @@ export function useWebRTC(url, username, onChatMessage) {
                     try {
                         stream = await navigator.mediaDevices.getUserMedia({ video: true });
                         localStreamRef.current = stream;
+                        setLocalStream(stream);
                         setVideoAvailable(true);
                     } catch (e2) {
                         console.warn("Camera fallback stream request failed:", e2);
@@ -491,6 +496,7 @@ export function useWebRTC(url, username, onChatMessage) {
                                 audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
                             });
                             localStreamRef.current = stream;
+                            setLocalStream(stream);
                             setAudioAvailable(true);
                         } catch (e3) {
                             setIsConnecting(false);
@@ -572,6 +578,7 @@ export function useWebRTC(url, username, onChatMessage) {
 
             if (combinedStream) {
                 localStreamRef.current = combinedStream;
+                setLocalStream(combinedStream);
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = combinedStream;
                 }
@@ -582,6 +589,7 @@ export function useWebRTC(url, username, onChatMessage) {
             // Stop tracks
             localStreamRef.current?.getTracks().forEach(t => t.stop());
             localStreamRef.current = null;
+            setLocalStream(null);
 
             Object.values(connectionsRef.current).forEach(pc => {
                 try {
@@ -626,6 +634,7 @@ export function useWebRTC(url, username, onChatMessage) {
         isConnecting,
         socketRef,
         remoteMediaStates,
-        activeSpeaker
+        activeSpeaker,
+        localStream
     };
 }

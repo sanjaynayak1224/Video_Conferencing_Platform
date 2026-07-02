@@ -80,7 +80,8 @@ export default function VideoMeetComponent() {
         showScreenShareError,
         setShowScreenShareError,
         remoteMediaStates,
-        activeSpeaker
+        activeSpeaker,
+        localStream
     } = useWebRTC(url, username, handleIncomingChatMessage);
 
     // Lock viewport scrolling when actively inside a meeting call
@@ -97,6 +98,15 @@ export default function VideoMeetComponent() {
             document.documentElement.classList.remove("meeting-active");
         };
     }, [askForUsername]);
+
+    // Bind localStream to localVideoRef when switching views (Lobby vs Call Room)
+    useEffect(() => {
+        if (localVideoRef.current && localStream) {
+            if (localVideoRef.current.srcObject !== localStream) {
+                localVideoRef.current.srcObject = localStream;
+            }
+        }
+    }, [localStream, askForUsername, localVideoRef]);
 
     // Auto-rejoin if username is already saved in localStorage and window session flag is set
     useEffect(() => {

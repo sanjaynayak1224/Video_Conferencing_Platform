@@ -82,10 +82,10 @@ export default function History() {
                   </Typography>
                   {meeting.joinedAt && (
                     <>
-                      <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardTime">
+                      <Typography sx={{ color: '#ffffff', mb: 1.2 }} className="cardTime">
                         Time: {formatTime(meeting.joinedAt)} - {meeting.leftAt ? formatTime(meeting.leftAt) : "Present"}
                       </Typography>
-                      <Typography sx={{ color: 'text.secondary', mb: 0 }} className="cardDuration">
+                      <Typography sx={{ color: '#ffffff', mb: 0 }} className="cardDuration">
                         Duration: {meeting.duration !== undefined && meeting.duration !== null ? formatDuration(meeting.duration) : "Active"}
                       </Typography>
                     </>

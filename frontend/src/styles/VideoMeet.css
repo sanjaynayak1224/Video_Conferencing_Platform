@@ -561,7 +561,6 @@ button.endCallButton:hover,
     .chatRoom {
         top: 0;
         right: 0;
-        bottom: 60px;
         left: auto;
         width: 50vw;
         height: calc(100dvh - 60px);
@@ -938,6 +937,21 @@ button.endCallButton:hover,
     0% { transform: scale(0.9); opacity: 0.8; }
     50% { transform: scale(1.1); opacity: 1; }
     100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* ── Short Viewports (Lobby height scaling for landscape iPads/tablets) ────── */
+@media (max-height: 800px) {
+    .lobbyContainer {
+        margin: 1.5rem auto;
+        padding: 1.2rem 1.6rem;
+    }
+    .lobbyContainer h2 {
+        margin-bottom: 1rem;
+        font-size: 1.6rem;
+    }
+    .lobbyVideoContainer {
+        margin-top: 1rem;
+    }
 }
 
 

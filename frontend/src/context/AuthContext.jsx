@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState } from 'react'
+import { createContext } from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import httpstatus from 'http-status';
@@ -16,10 +16,7 @@ const client=axios.create({
 
 export const AuthProvider = ({children}) => {
 
-    const authContext=useContext(AuthContext);
-
-    const [userData,setUserData]=useState(authContext);
-
+    const router=useNavigate();
 
     const handleRegister=async(name,username,password)=>{
         let request=await client.post("/register",{
@@ -45,29 +42,29 @@ export const AuthProvider = ({children}) => {
         }
     }
 
-    const router=useNavigate();
-
     const getHistoryOfUser=async()=>{
         let request=await client.get("/get_all_activity",{
-            params:{
-                token:localStorage.getItem("token")
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
             }
         })
-        console.log(request.data);
         return request.data;
     }
 
     const addToUserHistory=async(meetingCode)=>{
         let request=await client.post("/add_to_activity",{
-            token:localStorage.getItem("token"),
             meeting_code:meetingCode
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
         })
         return request;
     }
 
 
     const data={
-        userData, setUserData, getHistoryOfUser, addToUserHistory, handleRegister, handleLogin, router
+        getHistoryOfUser, addToUserHistory, handleRegister, handleLogin, router
     }
 
   
@@ -76,4 +73,4 @@ export const AuthProvider = ({children}) => {
           {children}
       </AuthContext.Provider>
     )
-}
+}

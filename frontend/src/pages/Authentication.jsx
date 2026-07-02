@@ -7,7 +7,8 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Snackbar from '@mui/material/Snackbar';
 import "../styles/Authentication.css";
@@ -27,6 +28,13 @@ const defaultTheme = createTheme({
 });
 
 export default function Authentication() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/home");
+    }
+  }, [navigate]);
   
   const [username, setUsername] = React.useState("");
 

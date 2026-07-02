@@ -15,13 +15,12 @@ export default function History() {
 
     const [meetings,setMeetings]=useState([])
 
-    const routTo=useNavigate();
+    const navigate=useNavigate();
 
     useEffect(()=>{
         const fetchHistory=async()=>{
             try{
                 const history=await getHistoryOfUser()
-                console.log(history)
                 setMeetings(history);
             }catch(e){console.log(e)}
         }
@@ -29,7 +28,7 @@ export default function History() {
         fetchHistory()
     },[getHistoryOfUser])
 
-    let formatDate=(dateString)=>{
+    const formatDate=(dateString)=>{
 
         const date=new Date(dateString);
         const day=date.getDate().toString().padStart(2, "0");
@@ -42,7 +41,7 @@ export default function History() {
   return (
     <div className="historyContainer">
       <div className="historyHeader">
-        <IconButton onClick={() => routTo("/home")} className="homeButton">
+        <IconButton onClick={() => navigate("/home")} className="homeButton">
           <HomeIcon />
         </IconButton>
         <h2>Meeting History</h2>

@@ -1,5 +1,5 @@
 import "../styles/LandingPage.css"
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 function LandingPage() {
 
@@ -27,8 +27,8 @@ function LandingPage() {
                 <h1><span style={{color:"#0E71EB"}}>Connect</span> with your loved ones</h1>
                 
                 <p>Cover a distance by Apna Video Call</p>
-                <div role="button" id="button">
-                    <Link to={"/auth"}>Get Started</Link>
+                <div role="button" id="button" onClick={() => router("/auth")}>
+                    <span>Get Started</span>
                 </div>
             </div>
 

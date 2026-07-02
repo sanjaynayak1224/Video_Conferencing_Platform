@@ -257,25 +257,31 @@
 }
 
 /* ── Local (self) picture-in-picture video ──────────────────────────────────── */
-.meetUserVideo {
+.meetUserVideoWrapper {
     position: absolute;
     bottom: 100px;
     left: 16px;
     width: 200px;
     aspect-ratio: 16 / 9;
-    object-fit: cover;
     border-radius: 14px;
+    overflow: hidden;
     border: 2px solid #0E71EB;
     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
     z-index: 20;
     background: #000;
     transition: width 0.3s ease, bottom 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+}
+.meetUserVideoWrapper:hover {
+    border-color: #00d2ff;
+    transform: scale(1.04);
+}
+.meetUserVideoWrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
     transform: scaleX(-1);       /* mirror self-view so it looks natural */
     cursor: grab;
-}
-.meetUserVideo:hover {
-    border-color: #00d2ff;
-    transform: scaleX(-1) scale(1.04);
 }
 
 /* ── Control bar ─────────────────────────────────────────────────────────── */
@@ -409,7 +415,7 @@ button.endCallButton:hover,
     .buttonContainers button.MuiIconButton-root svg { font-size: 1.4rem; }
 
     /* Self-view PiP */
-    .meetUserVideo {
+    .meetUserVideoWrapper {
         width: 90px;
         height: 140px; /* vertical layout */
         aspect-ratio: 9 / 16;
@@ -544,7 +550,7 @@ button.endCallButton:hover,
     }
 
     /* Self-view PiP — small, bottom-left so it doesn't block other videos */
-    .meetUserVideo {
+    .meetUserVideoWrapper {
         width: 100px;
         bottom: 68px;
         left: 8px;
@@ -567,7 +573,7 @@ button.endCallButton:hover,
 /* ── Very small screens (iPhone SE, etc.) ─────────────────────────────── */
 @media (max-width: 375px) {
     .buttonContainers { gap: 0.5rem; }
-    .meetUserVideo { width: 90px; }
+    .meetUserVideoWrapper { width: 90px; }
     .lobbyContainer h2 { font-size: 1.4rem; }
 }
 
@@ -690,3 +696,119 @@ button.endCallButton:hover,
         gap: 0.8rem;
     }
 }
+
+/* ── Name Badges & Labels ────────────────────────────────────────────────── */
+.videoLabel {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(13, 17, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+    z-index: 15;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    transition: opacity 0.3s ease;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.2px;
+}
+
+.meetUserVideoWrapper .localLabel {
+    bottom: 8px;
+    left: 8px;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    background: rgba(14, 113, 235, 0.45);
+    border-color: rgba(0, 210, 255, 0.25);
+}
+
+/* ── WebRTC ICE Connection Status Overlays ────────────────────────────────── */
+.connectionStatusOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 8, 16, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    animation: fadeInOverlay 0.3s ease;
+}
+
+.statusCard {
+    background: rgba(13, 17, 39, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.2rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    text-align: center;
+}
+
+.statusCard p {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+
+.pulseCircle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    position: relative;
+}
+
+.pulseCircle.red {
+    background-color: #ff5252;
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+    animation: pulseRed 1.8s infinite;
+}
+
+.pulseCircle.blue {
+    background-color: #0E71EB;
+    box-shadow: 0 0 0 0 rgba(14, 113, 235, 0.7);
+    animation: pulseBlue 1.8s infinite;
+}
+
+@keyframes pulseRed {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(255, 82, 82, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+    }
+}
+
+@keyframes pulseBlue {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(14, 113, 235, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(14, 113, 235, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(14, 113, 235, 0);
+    }
+}
+

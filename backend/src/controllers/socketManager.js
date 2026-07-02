@@ -34,6 +34,20 @@ export const connectToSocket = (server) => {
                     socket.user_id = decoded.username;
                     socket.joinedAt = new Date();
                     console.log(`[Socket Auth] Mapping authenticated user: ${socket.user_id}`);
+
+                    // Save initial meeting entry immediately on join
+                    const newMeeting = new Meeting({
+                        user_id: socket.user_id,
+                        meetingCode: path.replace(/^\//, ""),
+                        date: socket.joinedAt,
+                        joinedAt: socket.joinedAt
+                    });
+                    newMeeting.save()
+                        .then(doc => {
+                            socket.meetingLogId = doc._id;
+                            console.log(`[Socket DB] Saved initial meeting log: ${doc._id}`);
+                        })
+                        .catch(e => console.error("[Socket DB] Error saving initial log:", e));
                 } catch (e) {
                     console.warn("[Socket Auth] Token verification failed on room join:", e.message);
                 }
@@ -106,22 +120,19 @@ export const connectToSocket = (server) => {
             // Notify everyone in that room that the user has left
             socket.to(roomKey).emit("user-left", socket.id);
 
-            // Save meeting history entry to database on socket disconnection
-            if (socket.user_id && socket.joinedAt) {
+            // Update meeting history entry duration on socket disconnection
+            if (socket.meetingLogId) {
                 const leftAt = new Date();
-                const duration = leftAt - socket.joinedAt;
-                
-                const newMeeting = new Meeting({
-                    user_id: socket.user_id,
-                    meetingCode: roomKey.replace(/^\//, ""), // Strip leading slash
-                    date: socket.joinedAt,
-                    joinedAt: socket.joinedAt,
-                    leftAt: leftAt,
-                    duration: duration
-                });
-                newMeeting.save()
-                    .then(() => console.log(`[Socket DB] Successfully saved meeting log for ${socket.user_id}`))
-                    .catch(e => console.error("[Socket DB] Error saving meeting log:", e));
+                Meeting.findById(socket.meetingLogId)
+                    .then(meeting => {
+                        if (meeting) {
+                            meeting.leftAt = leftAt;
+                            meeting.duration = leftAt - meeting.joinedAt;
+                            return meeting.save();
+                        }
+                    })
+                    .then(() => console.log(`[Socket DB] Updated meeting log duration for: ${socket.meetingLogId}`))
+                    .catch(e => console.error("[Socket DB] Error updating meeting log:", e));
             }
 
             // Check if the native room is now empty

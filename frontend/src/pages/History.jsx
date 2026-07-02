@@ -81,14 +81,14 @@ export default function History() {
                     User ID: {meeting.user_id}
                   </Typography>
                   {meeting.joinedAt && (
-                    <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardTime">
-                      Time: {formatTime(meeting.joinedAt)} - {formatTime(meeting.leftAt)}
-                    </Typography>
-                  )}
-                  {meeting.duration !== undefined && (
-                    <Typography sx={{ color: 'text.secondary', mb: 0 }} className="cardDuration">
-                      Duration: {formatDuration(meeting.duration)}
-                    </Typography>
+                    <>
+                      <Typography sx={{ color: 'text.secondary', mb: 1.2 }} className="cardTime">
+                        Time: {formatTime(meeting.joinedAt)} - {meeting.leftAt ? formatTime(meeting.leftAt) : "Present"}
+                      </Typography>
+                      <Typography sx={{ color: 'text.secondary', mb: 0 }} className="cardDuration">
+                        Duration: {meeting.duration !== undefined && meeting.duration !== null ? formatDuration(meeting.duration) : "Active"}
+                      </Typography>
+                    </>
                   )}
                 </CardContent>
               </Card>

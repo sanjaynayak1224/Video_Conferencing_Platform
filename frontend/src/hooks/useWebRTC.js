@@ -532,26 +532,39 @@ export function useWebRTC(url, username, onChatMessage) {
             let combinedStream = null;
 
             try {
-                combinedStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                hasVideo = true;
-            } catch (e) {
-                console.warn("Camera denied:", e.message);
-            }
-
-            await new Promise(r => setTimeout(r, 300));
-
-            try {
-                const aStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                // Joint single-shot acquisition (iOS WebKit compatibility)
+                combinedStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
                 });
+                hasVideo = true;
                 hasAudio = true;
-                if (combinedStream) {
-                    aStream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
-                } else {
-                    combinedStream = aStream;
+                console.log("[Media] Joint getUserMedia acquisition successful.");
+            } catch (jointError) {
+                console.warn("[Media] Joint getUserMedia failed, running sequential track fallback:", jointError.message);
+                
+                try {
+                    combinedStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    hasVideo = true;
+                } catch (e) {
+                    console.warn("Camera fallback denied:", e.message);
                 }
-            } catch (e) {
-                console.warn("Mic denied:", e.message);
+
+                await new Promise(r => setTimeout(r, 200));
+
+                try {
+                    const aStream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                    });
+                    hasAudio = true;
+                    if (combinedStream) {
+                        aStream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
+                    } else {
+                        combinedStream = aStream;
+                    }
+                } catch (e) {
+                    console.warn("Mic fallback denied:", e.message);
+                }
             }
 
             setVideoAvailable(hasVideo);

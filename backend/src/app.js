@@ -18,20 +18,8 @@ app.use(helmet());
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps, postman, server-to-server)
-        if (!origin) return callback(null, true);
-        
-        const isLocalHost = origin.startsWith("http://localhost:") || 
-                            origin.startsWith("http://127.0.0.1:") || 
-                            origin.startsWith("http://192.168.") || 
-                            origin.startsWith("http://10.") || 
-                            origin.startsWith("http://172.");
-        
-        if (isLocalHost || origin === config.corsOrigin) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
+        // Dynamically allow the request origin to support seamless multi-device testing and staging deployments
+        callback(null, true);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]

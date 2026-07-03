@@ -954,4 +954,111 @@ button.endCallButton:hover,
     }
 }
 
+/* ── Lobby Actions (Copy Meeting Link) ────────────────────────────────────── */
+.lobbyActions {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
 
+.copyLinkBtn {
+    width: 100%;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    padding: 0.7rem !important;
+    transition: all 0.25s ease !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.copyLinkBtn:hover {
+    border-color: #0E71EB !important;
+    color: #0E71EB !important;
+    background: rgba(14, 113, 235, 0.06) !important;
+}
+
+/* ── Meeting Info Bar (Timer + Participant Count) ─────────────────────────── */
+.meetingInfoBar {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: rgba(13, 17, 39, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    z-index: 35;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.meetingTimer {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+}
+
+.participantCount {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.participantCount svg {
+    font-size: 1rem;
+}
+
+/* ── Chat Bubble Styling ──────────────────────────────────────────────────── */
+.chatBubble {
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.chatSender {
+    font-weight: 700 !important;
+    color: #0E71EB !important;
+    font-size: 0.82rem !important;
+    margin-bottom: 2px !important;
+}
+
+.chatText {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.92rem !important;
+    line-height: 1.4 !important;
+}
+
+.emptyChat {
+    color: rgba(255, 255, 255, 0.3) !important;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+/* ── Mobile responsive adjustments for new elements ───────────────────────── */
+@media (max-width: 600px) {
+    .meetingInfoBar {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        gap: 0.8rem;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .meetingInfoBar {
+        top: 8px;
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+}

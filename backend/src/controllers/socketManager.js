@@ -1,14 +1,14 @@
 import { Server } from "socket.io";
 import { Meeting } from "../models/meeting.model.js";
 import jwt from "jsonwebtoken";
+import config from "../config.js";
 
 let messages = {};
-let timeOnline = {};
 
 export const connectToSocket = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: process.env.CORS_ORIGIN || "*",
+            origin: config.corsOrigin,
             methods: ["GET", "POST"],
             allowedHeaders: ["*"]
         }
@@ -18,24 +18,19 @@ export const connectToSocket = (server) => {
         console.log("[Socket] Connected:", socket.id);
 
         socket.on("join-call", (path, username) => {
-            // Join native Socket.io room
             socket.join(path);
             socket.room = path;
             socket.username = username || "Guest";
-            socket.mediaState = { video: false, audio: false }; // Initial call join states default to off
-            timeOnline[socket.id] = new Date();
+            socket.mediaState = { video: false, audio: false };
 
-            // Handshake JWT Auth to map database session logs
+            // Authenticate socket to map database session logs
             const token = socket.handshake.auth?.token;
             if (token) {
                 try {
-                    const secret = process.env.JWT_SECRET || "apna_video_call_default_secret_key_2026";
-                    const decoded = jwt.verify(token, secret);
+                    const decoded = jwt.verify(token, config.jwtSecret);
                     socket.user_id = decoded.username;
                     socket.joinedAt = new Date();
-                    console.log(`[Socket Auth] Mapping authenticated user: ${socket.user_id}`);
 
-                    // Save initial meeting entry immediately on join
                     const newMeeting = new Meeting({
                         user_id: socket.user_id,
                         meetingCode: path.replace(/^\//, ""),
@@ -45,18 +40,16 @@ export const connectToSocket = (server) => {
                     newMeeting.save()
                         .then(doc => {
                             socket.meetingLogId = doc._id;
-                            console.log(`[Socket DB] Saved initial meeting log: ${doc._id}`);
+                            console.log(`[Socket DB] Saved meeting log: ${doc._id}`);
                         })
-                        .catch(e => console.error("[Socket DB] Error saving initial log:", e));
+                        .catch(e => console.error("[Socket DB] Error saving log:", e));
                 } catch (e) {
-                    console.warn("[Socket Auth] Token verification failed on room join:", e.message);
+                    console.warn("[Socket Auth] Token verification failed:", e.message);
                 }
             }
 
-            // Fetch list of client IDs in this native room
             const clients = Array.from(io.sockets.adapter.rooms.get(path) || []);
 
-            // Map IDs to username metadata and media states
             const clientList = clients.map(clientId => {
                 const clientSocket = io.sockets.sockets.get(clientId);
                 return {
@@ -66,16 +59,14 @@ export const connectToSocket = (server) => {
                 };
             });
 
-            console.log(`[Socket] User ${socket.id} (${socket.username}) joined room ${path}. Clients:`, clientList);
+            console.log(`[Socket] ${socket.username} (${socket.id}) joined room ${path}. Peers: ${clientList.length}`);
 
-            // Notify everyone in the room (including the joiner) about the updated client metadata list
             io.to(path).emit("user-joined", socket.id, clientList);
 
             // Replay chat history to the newly connected user
-            if (messages[path] !== undefined) {
+            if (messages[path]) {
                 messages[path].forEach((msg) => {
-                    // Fix: Emitting matching keys so that replayed message lists recognize the sender ID
-                    io.to(socket.id).emit("chat-message", msg.data, msg.sender, msg.socketId);
+                    io.to(socket.id).emit("chat-message", msg.data, msg.sender, msg.socketId, msg.timestamp);
                 });
             }
         });
@@ -92,35 +83,39 @@ export const connectToSocket = (server) => {
         });
 
         socket.on("chat-message", (data, sender) => {
-            const matchingRoom = socket.room;
-            if (!matchingRoom) return;
+            const room = socket.room;
+            if (!room) return;
 
-            if (!messages[matchingRoom]) {
-                messages[matchingRoom] = [];
+            if (!messages[room]) {
+                messages[room] = [];
             }
 
-            messages[matchingRoom].push({
-                sender: sender,
-                data: data,
-                socketId: socket.id
-            });
+            const chatEntry = {
+                sender,
+                data,
+                socketId: socket.id,
+                timestamp: new Date().toISOString()
+            };
 
-            console.log(`[Chat] ${matchingRoom} -> ${sender}: ${data}`);
+            messages[room].push(chatEntry);
 
-            // Broadcast message natively to all sockets in the room
-            io.to(matchingRoom).emit("chat-message", data, sender, socket.id);
+            // Cap message history to prevent unbounded memory growth
+            if (messages[room].length > config.maxMessagesPerRoom) {
+                messages[room] = messages[room].slice(-config.maxMessagesPerRoom);
+            }
+
+            io.to(room).emit("chat-message", data, sender, socket.id, chatEntry.timestamp);
         });
 
         socket.on("disconnect", () => {
             console.log("[Socket] Disconnected:", socket.id);
-            
+
             const roomKey = socket.room;
             if (!roomKey) return;
 
-            // Notify everyone in that room that the user has left
             socket.to(roomKey).emit("user-left", socket.id);
 
-            // Update meeting history entry duration on socket disconnection
+            // Update meeting duration on disconnect
             if (socket.meetingLogId) {
                 const leftAt = new Date();
                 Meeting.findById(socket.meetingLogId)
@@ -131,18 +126,16 @@ export const connectToSocket = (server) => {
                             return meeting.save();
                         }
                     })
-                    .then(() => console.log(`[Socket DB] Updated meeting log duration for: ${socket.meetingLogId}`))
-                    .catch(e => console.error("[Socket DB] Error updating meeting log:", e));
+                    .then(() => console.log(`[Socket DB] Updated duration for: ${socket.meetingLogId}`))
+                    .catch(e => console.error("[Socket DB] Error updating log:", e));
             }
 
-            // Check if the native room is now empty
+            // Purge message cache when room empties
             const roomExists = io.sockets.adapter.rooms.has(roomKey);
             if (!roomExists) {
-                console.log(`[Socket] Room ${roomKey} is now empty. Purging temporary messages cache.`);
+                console.log(`[Socket] Room ${roomKey} empty. Purging message cache.`);
                 delete messages[roomKey];
             }
-
-            delete timeOnline[socket.id];
         });
     });
 

@@ -1,57 +1,61 @@
 import express from "express";
-import {createServer} from "node:http";
-import dotenv from "dotenv"
-dotenv.config()
-
+import { createServer } from "node:http";
 import mongoose from "mongoose";
-import {connectToSocket} from "./controllers/socketManager.js"
-
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+
+import config from "./config.js";
+import { connectToSocket } from "./controllers/socketManager.js";
 import userRoutes from "./routes/users.routes.js";
 
 const app = express();
 const server = createServer(app);
 connectToSocket(server);
 
-app.set("port", (process.env.PORT) || 8080);
-
-// Global Security Middleware
+// Security headers
 app.use(helmet());
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: config.corsOrigin,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// API Rate Limiting for Authentication / Security paths
+// Rate limiting on auth endpoints to prevent brute-force attacks
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { message: "Too many authentication requests, please try again after 15 minutes" }
+    message: { message: "Too many requests, please try again after 15 minutes" }
 });
 
 app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
-// Apply rate limiter specifically to auth endpoints
 app.use("/api/v1/users", authLimiter, userRoutes);
 
+const start = async () => {
+    try {
+        const connection = await mongoose.connect(config.mongoUrl);
+        console.log(`Database connected: ${connection.connection.host}`);
 
-const start=async()=>{
-   try {
-      const connectionDb=await mongoose.connect(process.env.MONGO_URL)
-      console.log(`Database connected successfully: ${connectionDb.connection.host}`);
-      server.listen(app.get("port"),()=>{
-         console.log(`Server listening on port ${app.get("port")}`);
-      })
-   } catch (error) {
-      console.error(`Database connection error: ${error.message}`);
-      process.exit(1);
-   }
-}
+        server.listen(config.port, () => {
+            console.log(`Server listening on port ${config.port}`);
+        });
+    } catch (error) {
+        console.error(`Database connection failed: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+// Graceful shutdown on container/process signals
+process.on("SIGTERM", () => {
+    console.log("SIGTERM received. Shutting down gracefully...");
+    server.close(() => {
+        mongoose.connection.close(false).then(() => process.exit(0));
+    });
+});
 
 start();

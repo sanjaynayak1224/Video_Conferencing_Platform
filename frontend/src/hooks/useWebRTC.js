@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import io from 'socket.io-client';
-import server from '../environment';
+import server from '../config';
 
 const server_url = server;
 
@@ -40,7 +40,7 @@ export function useWebRTC(url, username, onChatMessage) {
     const [activeSpeaker, setActiveSpeaker] = useState(null);
     const [localStream, setLocalStream] = useState(null);
 
-    /** Returns a silent (muted) audio MediaStreamTrack and tracks its AudioContext for cleanup */
+    // Create a silent audio track for initial connection reference
     const makeSilentTrack = useCallback(() => {
         try {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -60,7 +60,7 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, []);
 
-    /** Returns a black (invisible) video MediaStreamTrack */
+    // Create a blank video track for initial connection reference
     const makeBlackTrack = useCallback(({ width = 640, height = 480 } = {}) => {
         try {
             const canvas = document.createElement("canvas");
@@ -78,7 +78,7 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, []);
 
-    /** Build a black-video + silent-audio MediaStream as a placeholder */
+    // Build placeholder stream when devices are blocked or unavailable
     const makeBlackSilenceStream = useCallback(() => {
         const tracks = [];
         const v = makeBlackTrack();
@@ -88,7 +88,7 @@ export function useWebRTC(url, username, onChatMessage) {
         return new MediaStream(tracks);
     }, [makeBlackTrack, makeSilentTrack]);
 
-    /** Handle incoming signaling message */
+    // Handle incoming WebRTC signaling message
     const gotMessageFromServer = useCallback((fromId, rawMsg) => {
         const signal = JSON.parse(rawMsg);
         if (fromId === socketRef.current?.id) return;
@@ -132,7 +132,7 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, []);
 
-    /** Clear active speaker status after silence delay */
+    // Clear active speaker state after silence timeout
     const clearActiveSpeakerTimeout = useCallback((remoteId) => {
         if (speakerTimeoutRef.current[remoteId]) {
             clearTimeout(speakerTimeoutRef.current[remoteId]);
@@ -209,7 +209,7 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, [clearActiveSpeakerTimeout]);
 
-    /** Create an RTCPeerConnection for a remote peer */
+    // Create PeerConnection for a remote participant
     const createPeerConnection = useCallback((remoteId) => {
         const pc = new RTCPeerConnection(peerConfigConnections);
 
@@ -255,7 +255,7 @@ export function useWebRTC(url, username, onChatMessage) {
         return pc;
     }, [makeBlackSilenceStream, startAudioAnalyzing]);
 
-    /** Establish Socket.IO connection and wire signaling events */
+    // Set up socket connection and event handlers
     const connectToSocketServer = useCallback(() => {
         const token = localStorage.getItem("token");
         const socket = io(server_url, {
@@ -333,7 +333,7 @@ export function useWebRTC(url, username, onChatMessage) {
         });
     }, [url, username, gotMessageFromServer, createPeerConnection, onChatMessage, stopAudioAnalyzing]);
 
-    /** Toggle local video track state */
+    // Toggle local video track state
     const toggleVideo = useCallback(() => {
         setVideo(prev => {
             const nextVal = !prev;
@@ -351,7 +351,7 @@ export function useWebRTC(url, username, onChatMessage) {
         });
     }, [audio]);
 
-    /** Toggle local audio track state */
+    // Toggle local audio track state
     const toggleAudio = useCallback(() => {
         setAudio(prev => {
             const nextVal = !prev;
@@ -364,7 +364,7 @@ export function useWebRTC(url, username, onChatMessage) {
         });
     }, [video]);
 
-    /** Stop screen sharing and restore camera input */
+    // Restore camera track and stop screen share
     const stopScreenShare = useCallback(async () => {
         screenActiveRef.current = false;
         setScreenUI(false);
@@ -399,7 +399,7 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, []);
 
-    /** Start screen sharing */
+    // Capture screen stream and replace peer tracks
     const startScreenShare = useCallback(() => {
         if (!navigator.mediaDevices?.getDisplayMedia) {
             setShowScreenShareError(true);
@@ -447,7 +447,7 @@ export function useWebRTC(url, username, onChatMessage) {
             });
     }, [stopScreenShare]);
 
-    /** Toggle screen share state */
+    // Toggle screen share state
     const toggleScreenShare = useCallback(() => {
         if (screenActiveRef.current) {
             stopScreenShare();
@@ -456,14 +456,14 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, [stopScreenShare, startScreenShare]);
 
-    /** Send chat message through socket client */
+    // Send chat message through socket
     const sendMessage = useCallback((messageText) => {
         if (socketRef.current && messageText.trim()) {
             socketRef.current.emit("chat-message", messageText, username);
         }
     }, [username]);
 
-    /** Explicit connect method */
+    // Acquire media streams and initiate socket signaling
     const connect = useCallback(async () => {
         if (connectingRef.current) return;
         connectingRef.current = true;
@@ -525,7 +525,43 @@ export function useWebRTC(url, username, onChatMessage) {
         }
     }, [connectToSocketServer]);
 
-    /** Core lifecycle setup (Permissions on mount, Cleanups on unmount) */
+    // Clean up call connections and media streams
+    const disconnect = useCallback(() => {
+        // Stop all local tracks
+        localStreamRef.current?.getTracks().forEach(t => t.stop());
+        localStreamRef.current = null;
+        setLocalStream(null);
+
+        // Close all peer connections
+        Object.values(connectionsRef.current).forEach(pc => {
+            try { pc.close(); } catch { /* ignore */ }
+        });
+        connectionsRef.current = {};
+        iceCandidateQRef.current = {};
+
+        // Clean up audio analyzers
+        Object.keys(audioAnalyzersRef.current).forEach(id => stopAudioAnalyzing(id));
+
+        // Disconnect socket
+        socketRef.current?.disconnect();
+        socketRef.current = null;
+
+        // Close silent track AudioContexts
+        audioContextsRef.current.forEach(ctx => {
+            if (ctx.state !== "closed") ctx.close().catch(() => {});
+        });
+        audioContextsRef.current = [];
+
+        setVideos([]);
+        setVideo(false);
+        setAudio(false);
+        setScreenUI(false);
+        setRemoteMediaStates({});
+        setActiveSpeaker(null);
+        connectingRef.current = false;
+    }, [stopAudioAnalyzing]);
+
+    // Check device permissions on mount and stop tracks on unmount
     useEffect(() => {
         if (!navigator.mediaDevices) {
             console.warn("navigator.mediaDevices unavailable.");
@@ -617,6 +653,7 @@ export function useWebRTC(url, username, onChatMessage) {
 
     return {
         connect,
+        disconnect,
         localVideoRef,
         videos,
         video,

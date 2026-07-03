@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import httpStatus from "http-status";
+import config from "../config.js";
 
 export const authMiddleware = (req, res, next) => {
     try {
@@ -9,9 +10,7 @@ export const authMiddleware = (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1];
-        const secret = process.env.JWT_SECRET || "apna_video_call_default_secret_key_2026";
-        
-        const decoded = jwt.verify(token, secret);
+        const decoded = jwt.verify(token, config.jwtSecret);
         req.userId = decoded.userId;
         req.username = decoded.username;
         next();

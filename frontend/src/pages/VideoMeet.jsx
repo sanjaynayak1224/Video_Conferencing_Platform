@@ -16,6 +16,8 @@ import Badge from '@mui/material/Badge';
 import ChatIcon from '@mui/icons-material/Chat';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PeopleIcon from '@mui/icons-material/People';
 import Snackbar from '@mui/material/Snackbar';
 
 const VIDEOS_PER_PAGE = 4;
@@ -24,7 +26,7 @@ export default function VideoMeetComponent() {
     const { url } = useParams();
     const routeTo = useNavigate();
 
-    // ── React UI state ───────────────────────────────────────────────────────────
+    // UI state
     const savedUsername = localStorage.getItem("apna_username") || "";
     const wasActive = sessionStorage.getItem(`apna_active_${url}`) === "true";
     const shouldAutoJoin = !!(savedUsername.trim() && url && wasActive);
@@ -36,35 +38,33 @@ export default function VideoMeetComponent() {
     const [username, setUsername] = useState(savedUsername);
     const [currentPage, setCurrentPage] = useState(0);
     const [showModal, setModal] = useState(false);
-    
-    // MUI Toast / Notifications state instead of standard alerts
     const [toastOpen, setToastOpen] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
+    const [meetingDuration, setMeetingDuration] = useState(0);
 
     const showModalRef = useRef(false);
+    const chatEndRef = useRef(null);
+    const meetingStartRef = useRef(null);
 
-    // Sync showModal state with ref for stale-closure safety in socket listener
     useEffect(() => {
         showModalRef.current = showModal;
     }, [showModal]);
 
-    // Toast triggers helper
     const triggerToast = useCallback((msg) => {
         setToastMessage(msg);
         setToastOpen(true);
     }, []);
 
-    // Handle incoming chat messages (passed as callback to useWebRTC hook)
     const handleIncomingChatMessage = useCallback((data, sender, isFromSelf) => {
-        setMessages(prev => [...prev, { sender, data }]);
+        setMessages(prev => [...prev, { sender, data, timestamp: new Date().toISOString() }]);
         if (!isFromSelf && !showModalRef.current) {
             setNewMessages(n => n + 1);
         }
     }, []);
 
-    // Initialize custom hook
     const {
         connect: rtcConnect,
+        disconnect: rtcDisconnect,
         localVideoRef,
         videos,
         video,
@@ -84,7 +84,7 @@ export default function VideoMeetComponent() {
         localStream
     } = useWebRTC(url, username, handleIncomingChatMessage);
 
-    // Lock viewport scrolling when actively inside a meeting call
+    // Lock viewport scrolling during active meeting
     useEffect(() => {
         if (!askForUsername) {
             document.body.classList.add("meeting-active");
@@ -99,7 +99,7 @@ export default function VideoMeetComponent() {
         };
     }, [askForUsername]);
 
-    // Bind localStream to localVideoRef when switching views (Lobby vs Call Room)
+    // Keep local video element synced with localStream updates
     useEffect(() => {
         if (localVideoRef.current && localStream) {
             if (localVideoRef.current.srcObject !== localStream) {
@@ -108,10 +108,9 @@ export default function VideoMeetComponent() {
         }
     }, [localStream, askForUsername, localVideoRef]);
 
-    // Auto-rejoin if username is already saved in localStorage and window session flag is set
+    // Auto-rejoin from saved session
     useEffect(() => {
         if (shouldAutoJoin) {
-            // Connect to call room automatically
             setTimeout(() => {
                 rtcConnect().catch(err => {
                     console.error("Auto-rejoin failed:", err);
@@ -121,7 +120,62 @@ export default function VideoMeetComponent() {
         }
     }, [shouldAutoJoin, rtcConnect, triggerToast]);
 
-    // ── Join meeting trigger ───────────────────────────────────────────────────
+    // Meeting duration timer
+    useEffect(() => {
+        if (!askForUsername && !meetingStartRef.current) {
+            meetingStartRef.current = Date.now();
+        }
+
+        if (!askForUsername) {
+            const interval = setInterval(() => {
+                if (meetingStartRef.current) {
+                    setMeetingDuration(Math.floor((Date.now() - meetingStartRef.current) / 1000));
+                }
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [askForUsername]);
+
+    // Keep currentPage within bounds when remote streams change
+    useEffect(() => {
+        const maxPage = Math.max(0, Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1);
+        if (currentPage > maxPage) {
+            Promise.resolve().then(() => {
+                setCurrentPage(maxPage);
+            });
+        }
+    }, [videos.length, currentPage]);
+
+    // Auto-scroll chat to latest message
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    // Keyboard shortcuts (M = mic, V = video, Esc = close chat)
+    useEffect(() => {
+        if (askForUsername) return;
+
+        const handleKeyDown = (e) => {
+            // Don't trigger shortcuts when typing in input fields
+            if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+            switch (e.key.toLowerCase()) {
+                case "m":
+                    toggleAudio();
+                    break;
+                case "v":
+                    toggleVideo();
+                    break;
+                case "escape":
+                    setModal(false);
+                    break;
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [askForUsername, toggleAudio, toggleVideo]);
+
     const connect = async () => {
         if (!username.trim()) {
             triggerToast("Please enter a username.");
@@ -143,23 +197,27 @@ export default function VideoMeetComponent() {
         }
     };
 
-    // Chat Message Sender
     const sendChatMessage = () => {
         if (!message.trim()) return;
         rtcSendMessage(message);
         setMessage("");
     };
 
-    // ── End call ─────────────────────────────────────────────────────────────
     const handleEndCall = () => {
         sessionStorage.removeItem(`apna_active_${url}`);
+        meetingStartRef.current = null;
+        rtcDisconnect();
         routeTo("/home");
     };
 
-    // ── Handle Bluetooth / audio output device changes mid-call ──────────────
+    const copyMeetingLink = () => {
+        navigator.clipboard.writeText(window.location.href);
+        triggerToast("Meeting link copied to clipboard!");
+    };
+
+    // Bluetooth / audio output device sync
     useEffect(() => {
         const handleDeviceChange = async () => {
-            console.log("[Audio] Device change detected. Syncing audio output targets.");
             try {
                 if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
                     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -167,29 +225,24 @@ export default function VideoMeetComponent() {
                     const targetSinkId = defaultOutput ? defaultOutput.deviceId : 'default';
 
                     const videoElements = document.querySelectorAll('video');
-                    for (const vEl of videoElements) {
-                        if (typeof vEl.setSinkId === 'function') {
-                            await vEl.setSinkId(targetSinkId).catch(err => {
-                                console.warn("[Audio] Failed to setSinkId on video element:", err);
-                            });
+                    for (const el of videoElements) {
+                        if (typeof el.setSinkId === 'function') {
+                            await el.setSinkId(targetSinkId).catch(() => {});
                         }
-                        if (vEl.srcObject) {
-                            vEl.play().catch(() => {});
+                        if (el.srcObject) {
+                            el.play().catch(() => {});
                         }
                     }
                 }
             } catch (err) {
-                console.warn("[Audio] handleDeviceChange error:", err);
+                console.warn("[Audio] Device change handler error:", err);
             }
         };
 
         navigator.mediaDevices?.addEventListener('devicechange', handleDeviceChange);
-        return () => {
-            navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
-        };
+        return () => navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
     }, []);
 
-    // Helper to get initials from username
     const getInitials = (name) => {
         if (!name) return "?";
         const parts = name.trim().split(" ");
@@ -199,7 +252,17 @@ export default function VideoMeetComponent() {
         return parts[0].substring(0, 2).toUpperCase();
     };
 
-    // Pagination and Active Speaker sorting
+    const formatDuration = (totalSeconds) => {
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        const pad = (n) => String(n).padStart(2, "0");
+        return hrs > 0
+            ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
+            : `${pad(mins)}:${pad(secs)}`;
+    };
+
+    // Sort remote videos: active speaker floats to front
     const sortedVideos = [...videos].sort((a, b) => {
         if (a.socketId === activeSpeaker) return -1;
         if (b.socketId === activeSpeaker) return 1;
@@ -207,21 +270,26 @@ export default function VideoMeetComponent() {
     });
 
     const maxPage = Math.max(0, Math.ceil(sortedVideos.length / VIDEOS_PER_PAGE) - 1);
-    if (currentPage > maxPage) {
-        setCurrentPage(maxPage);
-    }
-
     const visibleVideos = sortedVideos.slice(currentPage * VIDEOS_PER_PAGE, (currentPage + 1) * VIDEOS_PER_PAGE);
+
+    // Eagerly bind localStream when local video DOM element mounts
+    const localVideoRefCallback = useCallback((ref) => {
+        if (ref && localVideoRef.current !== ref) {
+            localVideoRef.current = ref;
+            if (localStream && ref.srcObject !== localStream) {
+                ref.srcObject = localStream;
+            }
+        }
+    }, [localStream, localVideoRef]);
 
     return (
         <div className="meetMainPage">
 
             {askForUsername ? (
-                /* ── Lobby ── */
                 <div className="lobbyContainer">
-                    <h2>Enter into the lobby</h2>
+                    <h2>Enter the Lobby</h2>
                     <TextField
-                        id="outlined-basic"
+                        id="lobby-username"
                         label="Username"
                         value={username}
                         onChange={e => setUsername(e.target.value)}
@@ -239,35 +307,37 @@ export default function VideoMeetComponent() {
                             <span>Microphone: {audioAvailable ? "Ready" : "Blocked"}</span>
                         </div>
                     </div>
+                    <div className="lobbyActions">
+                        <Button
+                            variant="outlined"
+                            startIcon={<ContentCopyIcon />}
+                            onClick={copyMeetingLink}
+                            className="copyLinkBtn"
+                        >
+                            Copy Meeting Link
+                        </Button>
+                    </div>
                     <div className="lobbyVideoContainer">
-                        <video
-                            playsInline autoPlay muted
-                            ref={ref => {
-                                if (ref && localVideoRef.current !== ref) {
-                                    localVideoRef.current = ref;
-                                }
-                            }}
-                        />
+                        <video playsInline autoPlay muted ref={localVideoRefCallback} />
                     </div>
                 </div>
 
             ) : (
-                /* ── Meeting room ── */
                 <div className={`meetVideoContainer ${showModal ? 'chatRoomOpen' : ''}`}>
 
                     {videos.length > VIDEOS_PER_PAGE && (
                         <>
-                            <IconButton 
-                                className="carouselArrow leftArrow" 
-                                disabled={currentPage === 0} 
+                            <IconButton
+                                className="carouselArrow leftArrow"
+                                disabled={currentPage === 0}
                                 onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                             >
                                 <ChevronLeftIcon />
                             </IconButton>
-                            <IconButton 
-                                className="carouselArrow rightArrow" 
-                                disabled={currentPage >= Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1} 
-                                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(videos.length / VIDEOS_PER_PAGE) - 1, prev + 1))}
+                            <IconButton
+                                className="carouselArrow rightArrow"
+                                disabled={currentPage >= maxPage}
+                                onClick={() => setCurrentPage(prev => Math.min(maxPage, prev + 1))}
                             >
                                 <ChevronRightIcon />
                             </IconButton>
@@ -282,13 +352,14 @@ export default function VideoMeetComponent() {
                                 <div className="chattingDisplay">
                                     {messages.length > 0
                                         ? messages.map((item, index) => (
-                                            <div key={index} style={{ marginBottom: "20px" }}>
-                                                <p style={{ fontWeight: "bold" }}>{item.sender}</p>
-                                                <p>{item.data}</p>
+                                            <div key={index} className="chatBubble">
+                                                <p className="chatSender">{item.sender}</p>
+                                                <p className="chatText">{item.data}</p>
                                             </div>
                                         ))
-                                        : <p>No messages yet</p>
+                                        : <p className="emptyChat">No messages yet</p>
                                     }
+                                    <div ref={chatEndRef} />
                                 </div>
                                 <div className="chattingArea">
                                     <TextField
@@ -304,22 +375,31 @@ export default function VideoMeetComponent() {
                         </div>
                     )}
 
+                    {/* Meeting info bar */}
+                    <div className="meetingInfoBar">
+                        <span className="meetingTimer">{formatDuration(meetingDuration)}</span>
+                        <span className="participantCount">
+                            <PeopleIcon fontSize="small" />
+                            {videos.length + 1}
+                        </span>
+                    </div>
+
                     {/* Control buttons */}
                     <div className="buttonContainers">
-                        <IconButton style={{ color: "white" }} onClick={toggleVideo}>
+                        <IconButton style={{ color: "white" }} onClick={toggleVideo} title="Toggle camera (V)">
                             {video ? <VideocamIcon /> : <VideocamOffIcon />}
                         </IconButton>
 
-                        <IconButton className="endCallButton" onClick={handleEndCall}>
+                        <IconButton className="endCallButton" onClick={handleEndCall} title="End call">
                             <CallEndIcon />
                         </IconButton>
 
-                        <IconButton style={{ color: "white" }} onClick={toggleAudio}>
+                        <IconButton style={{ color: "white" }} onClick={toggleAudio} title="Toggle mic (M)">
                             {audio ? <MicIcon /> : <MicOffIcon />}
                         </IconButton>
 
                         {screenAvailable && (
-                            <IconButton style={{ color: "white" }} onClick={toggleScreenShare}>
+                            <IconButton style={{ color: "white" }} onClick={toggleScreenShare} title="Share screen">
                                 {screen ? <StopScreenShareIcon /> : <ScreenShareIcon />}
                             </IconButton>
                         )}
@@ -328,22 +408,19 @@ export default function VideoMeetComponent() {
                             <IconButton
                                 onClick={() => { setModal(m => !m); setNewMessages(0); }}
                                 style={{ color: "white" }}
+                                title="Chat"
                             >
                                 <ChatIcon />
                             </IconButton>
                         </Badge>
                     </div>
 
-                    {/* Local (self) video — wrapped to support overlays */}
+                    {/* Local (self) video */}
                     <div className="meetUserVideoWrapper">
                         <video
                             playsInline autoPlay muted
                             className="meetUserVideo"
-                            ref={ref => {
-                                if (ref && localVideoRef.current !== ref) {
-                                    localVideoRef.current = ref;
-                                }
-                            }}
+                            ref={localVideoRefCallback}
                         />
                         <div className="videoLabel localLabel">
                             <span>{username} (You)</span>
@@ -377,9 +454,9 @@ export default function VideoMeetComponent() {
                                         }}
                                         onLoadedMetadata={e => {
                                             const el = e.target;
-                                            el.muted = false; // Safari-friendly unmuting after loaded metadata event
+                                            el.muted = false;
                                             el.play().catch(() => {
-                                                el.muted = true; // Fallback muted autoplay if gesture parsing fails
+                                                el.muted = true;
                                                 el.play().catch(() => {});
                                             });
                                         }}
@@ -389,14 +466,12 @@ export default function VideoMeetComponent() {
                                         {remoteAudioMuted && <MicOffIcon className="micStatusIcon" />}
                                     </div>
 
-                                    {/* Video Mute Placeholder Card */}
                                     {remoteVideoOff && (
                                         <div className="avatarPlaceholder">
                                             <span>{getInitials(v.username)}</span>
                                         </div>
                                     )}
 
-                                    {/* Connection status feedback overlays */}
                                     {isDisconnected && (
                                         <div className="connectionStatusOverlay disconnected">
                                             <div className="statusCard">
@@ -418,30 +493,24 @@ export default function VideoMeetComponent() {
                         })}
                     </div>
 
-                    {/* Screen Share Error Modal */}
+                    {/* Screen Share Error Dialog */}
                     {showScreenShareError && (
                         <div className="shareErrorOverlay">
                             <div className="shareErrorCard">
                                 <h3>Screen Sharing Unavailable</h3>
                                 <p>
-                                    Mobile operating systems (iOS, iPadOS, and Android) do not support screen sharing in web browsers due to security restrictions.
+                                    Mobile operating systems do not support screen sharing in web browsers due to security restrictions.
                                 </p>
                                 <p className="recommendText">
                                     To share your screen, please join this meeting on a laptop or desktop computer.
                                 </p>
                                 <div className="shareErrorActions">
-                                    <Button 
-                                        variant="contained" 
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(window.location.href);
-                                            triggerToast("Meeting link copied to clipboard!");
-                                        }}
-                                    >
+                                    <Button variant="contained" onClick={copyMeetingLink}>
                                         Copy Link
                                     </Button>
-                                    <Button 
+                                    <Button
                                         className="closeBtn"
-                                        variant="outlined" 
+                                        variant="outlined"
                                         onClick={() => setShowScreenShareError(false)}
                                     >
                                         Close
@@ -454,7 +523,6 @@ export default function VideoMeetComponent() {
                 </div>
             )}
 
-            {/* Notification system */}
             <Snackbar
                 open={toastOpen}
                 autoHideDuration={4000}

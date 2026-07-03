@@ -1,7 +1,29 @@
-frontend/node_modules
-backend/node_modules
-backend/.env
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
 
-# Temporary lint logs
+# Environment variables (contain secrets)
+.env
+backend/.env
+frontend/.env
+
+# Build output
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
 frontend/lint_output.txt
 frontend/lint_output_utf8.txt

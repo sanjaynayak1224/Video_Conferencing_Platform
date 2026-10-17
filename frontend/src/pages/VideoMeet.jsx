@@ -215,34 +215,6 @@ export default function VideoMeetComponent() {
         triggerToast("Meeting link copied to clipboard!");
     };
 
-    // Bluetooth / audio output device sync
-    useEffect(() => {
-        const handleDeviceChange = async () => {
-            try {
-                if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    const defaultOutput = devices.find(d => d.kind === 'audiooutput' && d.deviceId === 'default');
-                    const targetSinkId = defaultOutput ? defaultOutput.deviceId : 'default';
-
-                    const videoElements = document.querySelectorAll('video');
-                    for (const el of videoElements) {
-                        if (typeof el.setSinkId === 'function') {
-                            await el.setSinkId(targetSinkId).catch(() => {});
-                        }
-                        if (el.srcObject) {
-                            el.play().catch(() => {});
-                        }
-                    }
-                }
-            } catch (err) {
-                console.warn("[Audio] Device change handler error:", err);
-            }
-        };
-
-        navigator.mediaDevices?.addEventListener('devicechange', handleDeviceChange);
-        return () => navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
-    }, []);
-
     const getInitials = (name) => {
         if (!name) return "?";
         const parts = name.trim().split(" ");
